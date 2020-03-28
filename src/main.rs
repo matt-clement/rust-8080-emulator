@@ -4,11 +4,10 @@ use std::fs::File;
 fn main() {
     let file_name = std::env::args().nth(1).expect("Pass file name as first argument");
     let mut file = File::open(&file_name).expect(&format!("Unable to open file '{}'", file_name));
-    let metadata = std::fs::metadata(file_name).unwrap();
     let mut buffer: Vec<u8> = Vec::new();
     let _ = file.read_to_end(&mut buffer);
     let mut pc: u8 = 0;
-    while (pc as u64) < metadata.len() {
+    while (pc as usize) < buffer.len() {
         pc += disassemble_opcode(&buffer, pc);
     }
 }
