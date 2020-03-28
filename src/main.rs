@@ -1,9 +1,20 @@
+use std::io::prelude::*;
+use std::fs::File;
+
 fn main() {
-    disassemble(&[0x06, 0x3A, 0x44, 0x3c], 0);
+    let file_name = std::env::args().nth(1).expect("Pass file name as first argument");
+    let mut file = File::open(&file_name).expect(&format!("Unable to open file '{}'", file_name));
+    let metadata = std::fs::metadata(file_name).unwrap();
+    let mut buffer: Vec<u8> = Vec::new();
+    let _ = file.read_to_end(&mut buffer);
+    let mut pc: u8 = 0;
+    while (pc as u64) < metadata.len() {
+        pc += disassemble_opcode(&buffer, pc);
+    }
 }
 
 // 8080 disassembler
-fn disassemble(src: &[u8], pc: u8) -> u8 {
+fn disassemble_opcode(src: &[u8], pc: u8) -> u8 {
     let mut opbytes = 1;
     print!("{:04x}\t", pc);
     let code = src[pc as usize];
