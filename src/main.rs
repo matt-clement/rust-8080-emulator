@@ -6,14 +6,14 @@ fn main() {
     let mut file = File::open(&file_name).expect(&format!("Unable to open file '{}'", file_name));
     let mut buffer: Vec<u8> = Vec::new();
     let _ = file.read_to_end(&mut buffer);
-    let mut pc: u8 = 0;
-    while (pc as usize) < buffer.len() {
+    let mut pc: usize = 0;
+    while pc < buffer.len() {
         pc += disassemble_opcode(&buffer, pc);
     }
 }
 
 // 8080 disassembler
-fn disassemble_opcode(src: &[u8], pc: u8) -> u8 {
+fn disassemble_opcode(src: &[u8], pc: usize) -> usize {
     let mut opbytes = 1;
     print!("{:04x}\t", pc);
     let code = src[pc as usize];
