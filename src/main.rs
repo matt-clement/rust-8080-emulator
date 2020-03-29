@@ -741,8 +741,13 @@ fn emulate_8080_op(state: &mut State8080) {
     state.pc += 1;
 }
 
+// Returns 1 for even parity, 0 for odd
 fn parity(x: u8) -> u8 {
-    unimplemented!()
+    let mut p: u8 = x ^ x.checked_shr(1).unwrap_or(0);
+    p ^= p.checked_shr(2).unwrap_or(0);
+    p ^= p.checked_shr(4).unwrap_or(0);
+    p ^= p.checked_shr(8).unwrap_or(0);
+    if (p & 0x01) == 1 { 0 } else { 1 }
 }
 
 fn main() {
@@ -1021,4 +1026,51 @@ fn disassemble_opcode(src: &[u8], pc: usize) -> usize {
     };
     println!();
     opbytes
+}
+
+mod test {
+    use super::*;
+
+    fn empty_state() -> State8080 {
+        State8080 {
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            h: 0,
+            l: 0,
+            cc: ConditionCodes { ac: 0, cy: 0, p: 0, pad: 0, s: 0, z: 0 },
+            int_enable: 0,
+            memory: Vec::new(),
+            sp: 0,
+            pc: 0,
+        }
+    }
+
+    #[test]
+    fn dothething() {
+        let mut state = empty_state();
+        state.memory = vec![0x87];
+        emulate_8080_op(&mut state);
+        assert_eq!(state.cc.z, 1);
+        assert_eq!(state.cc.p, 1);
+    }
+
+    #[test]
+    fn test_parity() {
+        assert_eq!(parity(0), 1);
+        assert_eq!(parity(1), 0);
+        assert_eq!(parity(2), 0);
+        assert_eq!(parity(3), 1);
+        assert_eq!(parity(4), 0);
+        assert_eq!(parity(5), 1);
+        assert_eq!(parity(8), 0);
+        assert_eq!(parity(16), 0);
+        assert_eq!(parity(127), 0);
+        assert_eq!(parity(128), 0);
+        assert_eq!(parity(129), 1);
+        assert_eq!(parity(254), 0);
+        assert_eq!(parity(255), 1);
+    }
 }
