@@ -52,7 +52,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -60,7 +59,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.b - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -79,7 +77,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -87,7 +84,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.c - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -106,7 +102,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -114,7 +109,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.d - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -133,7 +127,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -141,7 +134,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.e - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -160,7 +152,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -168,7 +159,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.h - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -187,7 +177,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -195,7 +184,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.l - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -213,7 +201,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -223,7 +210,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = minuend - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if minuend < 1 { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -240,7 +226,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
             state.h = masked_answer;
         },
@@ -248,7 +233,6 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a - 1;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
             state.cc.p = parity(answer);
             state.a = answer;
         },
