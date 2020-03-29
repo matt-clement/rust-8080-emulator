@@ -741,7 +741,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.b;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -749,7 +749,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.c;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -757,7 +757,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.d;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -765,7 +765,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.e;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -773,7 +773,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.h;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -781,7 +781,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.l;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -790,7 +790,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.memory[offset as usize];
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -798,7 +798,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a & state.a;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -806,7 +806,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.b;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -814,7 +814,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.c;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -822,7 +822,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.d;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -830,7 +830,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.e;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -838,7 +838,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.h;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -846,7 +846,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.l;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -855,7 +855,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.memory[offset as usize];
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -863,7 +863,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a ^ state.a;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -871,7 +871,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.b;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -879,7 +879,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.c;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -887,7 +887,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.d;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -895,7 +895,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.e;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -903,7 +903,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.h;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -911,7 +911,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.l;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -920,7 +920,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.memory[offset as usize];
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
@@ -928,7 +928,7 @@ fn emulate_8080_op(state: &mut State8080) {
             let answer: u8 = state.a | state.a;
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.cy = 0;
             state.cc.p = parity(answer);
             state.a = answer;
         },
