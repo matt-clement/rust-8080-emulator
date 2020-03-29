@@ -750,14 +750,33 @@ fn parity(x: u8) -> u8 {
     if (p & 0x01) == 1 { 0 } else { 1 }
 }
 
+fn empty_state() -> State8080 {
+    State8080 {
+        a: 0,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0,
+        h: 0,
+        l: 0,
+        cc: ConditionCodes { ac: 0, cy: 0, p: 0, pad: 0, s: 0, z: 0 },
+        int_enable: 0,
+        memory: Vec::new(),
+        sp: 0,
+        pc: 0,
+    }
+}
+
+
 fn main() {
     let file_name = std::env::args().nth(1).expect("Pass file name as first argument");
     let mut file = File::open(&file_name).expect(&format!("Unable to open file '{}'", file_name));
     let mut buffer: Vec<u8> = Vec::new();
     let _ = file.read_to_end(&mut buffer);
-    let mut pc: usize = 0;
-    while pc < buffer.len() {
-        pc += disassemble_opcode(&buffer, pc);
+    let mut state = empty_state();
+    state.memory = buffer;
+    loop {
+        emulate_8080_op(&mut state);
     }
 }
 
@@ -1030,23 +1049,6 @@ fn disassemble_opcode(src: &[u8], pc: usize) -> usize {
 
 mod test {
     use super::*;
-
-    fn empty_state() -> State8080 {
-        State8080 {
-            a: 0,
-            b: 0,
-            c: 0,
-            d: 0,
-            e: 0,
-            h: 0,
-            l: 0,
-            cc: ConditionCodes { ac: 0, cy: 0, p: 0, pad: 0, s: 0, z: 0 },
-            int_enable: 0,
-            memory: Vec::new(),
-            sp: 0,
-            pc: 0,
-        }
-    }
 
     #[test]
     fn dothething() {
