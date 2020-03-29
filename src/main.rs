@@ -1272,6 +1272,9 @@ fn main() {
     let mut file = File::open(&file_name).expect(&format!("Unable to open file '{}'", file_name));
     let mut buffer: Vec<u8> = Vec::new();
     let _ = file.read_to_end(&mut buffer);
+    while buffer.len() < 0x10000 {
+        buffer.push(0);
+    }
     let mut state = empty_state();
     state.memory = buffer;
     loop {
