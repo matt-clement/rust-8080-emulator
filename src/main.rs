@@ -63,8 +63,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x06 => {
-            state.b = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.b = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x07 => unimplemented_instruction(state),
         0x08 => unimplemented_instruction(state),
@@ -98,8 +98,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x0e => {
-            state.c = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.c = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x0f => unimplemented_instruction(state),
         0x10 => unimplemented_instruction(state),
@@ -126,8 +126,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x16 => {
-            state.d = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.d = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x17 => unimplemented_instruction(state),
         0x18 => unimplemented_instruction(state),
@@ -161,8 +161,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x1e => {
-            state.e = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.e = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x1f => unimplemented_instruction(state),
         0x20 => unimplemented_instruction(state),
@@ -189,8 +189,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x26 => {
-            state.h = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.h = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x27 => unimplemented_instruction(state),
         0x28 => unimplemented_instruction(state),
@@ -223,8 +223,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x2e => {
-            state.l = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.l = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x2f => unimplemented_instruction(state),
         0x30 => unimplemented_instruction(state),
@@ -253,8 +253,8 @@ fn emulate_8080_op(state: &mut State8080) {
         },
         0x36 => {
             let offset: usize = ((state.h as usize) << 8 ) | state.l as usize;
-            state.memory[offset] = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.memory[offset] = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x37 => unimplemented_instruction(state),
         0x38 => unimplemented_instruction(state),
@@ -285,8 +285,8 @@ fn emulate_8080_op(state: &mut State8080) {
             state.a = answer;
         },
         0x3e => {
-            state.a = state.memory[state.sp as usize + 1];
-            state.sp += 1;
+            state.a = state.memory[state.pc as usize + 1];
+            state.pc += 1;
         },
         0x3f => unimplemented_instruction(state),
         0x40 => unimplemented_instruction(state),
@@ -1624,5 +1624,19 @@ mod test {
         state.l = 0x02;
         emulate_8080_op(&mut state);
         assert_eq!(state.memory[2], 0xff);
+    }
+
+    #[test]
+    fn test_sequential_mvi() {
+        let mut state = empty_state();
+        state.memory = vec![0x06, 0xde, 0x0e, 0xad];
+        state.b = 0x00;
+        state.c = 0x00;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.b, 0xde);
+        assert_eq!(state.c, 0x00);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.b, 0xde);
+        assert_eq!(state.c, 0xad);
     }
 }
