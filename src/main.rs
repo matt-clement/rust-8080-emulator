@@ -65,7 +65,14 @@ fn emulate_8080_op(state: &mut State8080) {
         0x06 => unimplemented_instruction(state),
         0x07 => unimplemented_instruction(state),
         0x08 => unimplemented_instruction(state),
-        0x09 => unimplemented_instruction(state),
+        0x09 => {
+            let bc: u16 = ((state.b as u16) << 8) | state.c as u16;
+            let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
+            let result: u32 = hl as u32 + bc as u32;
+            state.cc.cy = if result > 0xffff { 1 } else { 0 };
+            state.h = ((result & 0xff00) >> 8) as u8;
+            state.l = (result & 0x00ff) as u8;
+        },
         0x0a => unimplemented_instruction(state),
         0x0b => {
             let result = (((state.b as u16) << 8) | state.c as u16) - 1;
@@ -115,7 +122,14 @@ fn emulate_8080_op(state: &mut State8080) {
         0x16 => unimplemented_instruction(state),
         0x17 => unimplemented_instruction(state),
         0x18 => unimplemented_instruction(state),
-        0x19 => unimplemented_instruction(state),
+        0x19 => {
+            let de: u16 = ((state.d as u16) << 8) | state.e as u16;
+            let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
+            let result: u32 = hl as u32 + de as u32;
+            state.cc.cy = if result > 0xffff { 1 } else { 0 };
+            state.h = ((result & 0xff00) >> 8) as u8;
+            state.l = (result & 0x00ff) as u8;
+        },
         0x1a => unimplemented_instruction(state),
         0x1b => {
             let result = (((state.d as u16) << 8) | state.e as u16) - 1;
@@ -165,7 +179,13 @@ fn emulate_8080_op(state: &mut State8080) {
         0x26 => unimplemented_instruction(state),
         0x27 => unimplemented_instruction(state),
         0x28 => unimplemented_instruction(state),
-        0x29 => unimplemented_instruction(state),
+        0x29 => {
+            let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
+            let result: u32 = hl as u32 + hl as u32;
+            state.cc.cy = if result > 0xffff { 1 } else { 0 };
+            state.h = ((result & 0xff00) >> 8) as u8;
+            state.l = (result & 0x00ff) as u8;
+        },
         0x2a => unimplemented_instruction(state),
         0x2b => {
             let result = (((state.h as u16) << 8) | state.l as u16) - 1;
@@ -216,7 +236,13 @@ fn emulate_8080_op(state: &mut State8080) {
         0x36 => unimplemented_instruction(state),
         0x37 => unimplemented_instruction(state),
         0x38 => unimplemented_instruction(state),
-        0x39 => unimplemented_instruction(state),
+        0x39 => {
+            let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
+            let result: u32 = hl as u32 + state.sp as u32;
+            state.cc.cy = if result > 0xffff { 1 } else { 0 };
+            state.h = ((result & 0xff00) >> 8) as u8;
+            state.l = (result & 0x00ff) as u8;
+        },
         0x3a => unimplemented_instruction(state),
         0x3b => {
             state.sp -= 1;
@@ -1513,5 +1539,37 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.h, 0x97);
         assert_eq!(state.l, 0xff);
+    }
+
+    #[test]
+    fn test_dad_b() {
+        let mut state = empty_state();
+        state.memory = vec![0x09];
+        state.b = 0x33;
+        state.c = 0x9f;
+        state.h = 0xa1;
+        state.l = 0x7b;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.b, 0x33);
+        assert_eq!(state.c, 0x9f);
+        assert_eq!(state.h, 0xd5);
+        assert_eq!(state.l, 0x1a);
+        assert_eq!(state.cc.cy, 0);
+    }
+
+    #[test]
+    fn test_dad_b_carry() {
+        let mut state = empty_state();
+        state.memory = vec![0x09];
+        state.b = 0xff;
+        state.c = 0xff;
+        state.h = 0x00;
+        state.l = 0x02;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.b, 0xff);
+        assert_eq!(state.c, 0xff);
+        assert_eq!(state.h, 0x00);
+        assert_eq!(state.l, 0x01);
+        assert_eq!(state.cc.cy, 1);
     }
 }
