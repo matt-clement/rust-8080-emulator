@@ -884,15 +884,15 @@ fn emulate_8080_op(state: &mut State8080) {
         },
         0xc3 => {
             let offset: usize = state.pc as usize;
-            let high_address = (state.memory[offset+ 2] as u16) << 8;
+            let high_address = (state.memory[offset + 2] as u16) << 8;
             let low_address = state.memory[offset + 1] as u16;
             state.pc = high_address | low_address;
         },
         0xc4 => {
             if state.cc.z != 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -932,8 +932,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xcc => {
             if state.cc.z == 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -942,8 +942,8 @@ fn emulate_8080_op(state: &mut State8080) {
         },
         0xcd => {
             let ret: u16 = state.pc + 2;
-            state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-            state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+            state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+            state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
             state.sp = state.sp - 2;
             state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
         },
@@ -974,8 +974,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xd4 => {
             if state.cc.cy != 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -1010,8 +1010,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xdc => {
             if state.cc.cy == 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -1046,8 +1046,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xe4 => {
             if state.cc.p == 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -1082,8 +1082,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xec => {
             if state.cc.p != 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -1118,8 +1118,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xf4 => {
             if state.cc.s == 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
@@ -1154,8 +1154,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0xfc => {
             if state.cc.s != 0 {
                 let ret: u16 = state.pc + 2;
-                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
-                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
                 state.sp = state.sp - 2;
                 state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
             } else {
