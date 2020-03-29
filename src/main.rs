@@ -258,14 +258,79 @@ fn emulate_8080_op(state: &mut State8080) {
             state.cc.p = parity(masked_answer);
             state.a = masked_answer;
         },
-        0x88 => unimplemented_instruction(state),
-        0x89 => unimplemented_instruction(state),
-        0x8a => unimplemented_instruction(state),
-        0x8b => unimplemented_instruction(state),
-        0x8c => unimplemented_instruction(state),
-        0x8d => unimplemented_instruction(state),
-        0x8e => unimplemented_instruction(state),
-        0x8f => unimplemented_instruction(state),
+        0x88 => {
+            let answer: u16 = (state.a as u16) + (state.b as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x89 => {
+            let answer: u16 = (state.a as u16) + (state.c as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x8a => {
+            let answer: u16 = (state.a as u16) + (state.d as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x8b => {
+            let answer: u16 = (state.a as u16) + (state.e as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x8c => {
+            let answer: u16 = (state.a as u16) + (state.h as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x8d => {
+            let answer: u16 = (state.a as u16) + (state.l as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x8e => {
+            let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
+            let answer: u16 = (state.a as u16) + state.memory[offset as usize] as u16 + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
+        0x8f => {
+            let answer: u16 = (state.a as u16) + (state.a as u16) + (state.cc.cy as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+        },
         0x90 => unimplemented_instruction(state),
         0x91 => unimplemented_instruction(state),
         0x92 => unimplemented_instruction(state),
