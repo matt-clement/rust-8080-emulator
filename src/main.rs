@@ -141,7 +141,7 @@ fn emulate_8080_op(state: &mut State8080) {
         0x33 => unimplemented_instruction(state),
         0x34 => {
             let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
-            let answer: u16 = (state.a as u16) + state.memory[offset as usize] as u16;
+            let answer: u16 = state.memory[offset as usize] as u16 + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
