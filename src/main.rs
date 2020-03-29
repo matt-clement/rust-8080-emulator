@@ -42,7 +42,11 @@ fn emulate_8080_op(state: &mut State8080) {
             state.pc += 2;
         },
         0x02 => unimplemented_instruction(state),
-        0x03 => unimplemented_instruction(state),
+        0x03 => {
+            let result = (((state.b as u16) << 8) | state.c as u16) + 1;
+            state.b = ((result & 0xff00) >> 8) as u8;
+            state.c = (result & 0x00ff) as u8;
+        },
         0x04 => {
             let answer: u16 = (state.b as u16) + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
@@ -88,7 +92,11 @@ fn emulate_8080_op(state: &mut State8080) {
         0x10 => unimplemented_instruction(state),
         0x11 => unimplemented_instruction(state),
         0x12 => unimplemented_instruction(state),
-        0x13 => unimplemented_instruction(state),
+        0x13 => {
+            let result = (((state.d as u16) << 8) | state.e as u16) + 1;
+            state.d = ((result & 0xff00) >> 8) as u8;
+            state.e = (result & 0x00ff) as u8;
+        }
         0x14 => {
             let answer: u16 = (state.d as u16) + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
@@ -134,7 +142,11 @@ fn emulate_8080_op(state: &mut State8080) {
         0x20 => unimplemented_instruction(state),
         0x21 => unimplemented_instruction(state),
         0x22 => unimplemented_instruction(state),
-        0x23 => unimplemented_instruction(state),
+        0x23 => {
+            let result = (((state.h as u16) << 8) | state.l as u16) + 1;
+            state.h = ((result & 0xff00) >> 8) as u8;
+            state.l = (result & 0x00ff) as u8;
+        },
         0x24 => {
             let answer: u16 = (state.h as u16) + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
@@ -180,7 +192,9 @@ fn emulate_8080_op(state: &mut State8080) {
         0x30 => unimplemented_instruction(state),
         0x31 => unimplemented_instruction(state),
         0x32 => unimplemented_instruction(state),
-        0x33 => unimplemented_instruction(state),
+        0x33 => {
+            state.sp += 1;
+        },
         0x34 => {
             let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
             let answer: u16 = state.memory[offset as usize] as u16 + 1;
@@ -1437,5 +1451,25 @@ mod test {
         assert_eq!(parity(129), 1);
         assert_eq!(parity(254), 0);
         assert_eq!(parity(255), 1);
+    }
+
+    #[test]
+    fn test_inx_d_low() {
+        let mut state = empty_state();
+        state.memory = vec![0x13];
+        emulate_8080_op(&mut state);
+        assert_eq!(state.d, 0);
+        assert_eq!(state.e, 1);
+    }
+
+    #[test]
+    fn test_inx_d_rollover() {
+        let mut state = empty_state();
+        state.memory = vec![0x13];
+        state.d = 0x38;
+        state.e = 0xff;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.d, 0x39);
+        assert_eq!(state.e, 0x00);
     }
 }
