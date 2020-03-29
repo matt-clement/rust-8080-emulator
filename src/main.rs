@@ -52,7 +52,7 @@ fn emulate_8080_op(state: &mut State8080) {
     let program_counter: usize = state.pc as usize;
     let opcode: u8 = state.memory[program_counter];
     let (opcode_description, _) = disassemble_opcode(&state.memory, program_counter);
-    println!("{}\t|\t Opcode: 0x{:02x}, State: {:x?}", opcode_description, opcode, state);
+    println!("{}\t| {:#02x} | {:x?}", opcode_description, opcode, state);
 
     state.pc += 1;
 
