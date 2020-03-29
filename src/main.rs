@@ -1773,4 +1773,49 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.pc, 0x04);
     }
+
+    #[test]
+    fn simple_loop_test() {
+        let mut state = empty_state();
+        state.memory = vec![
+            0x3e, 0x03, // MVI A 0x03
+            0xfa, 0x10, 0x00, // JM 0x10 0x00
+            0x3d, // DCR A
+            0xc3, 0x02, 0x00, // JMP 0x02 0x00
+            0x00, // NOP
+        ];
+        emulate_8080_op(&mut state); // MVI
+        assert_eq!(state.a, 0x03);
+        assert_eq!(state.cc.z, 0x00);
+        emulate_8080_op(&mut state); // JM
+        assert_eq!(state.pc, 0x05);
+        emulate_8080_op(&mut state); // DCR A
+        assert_eq!(state.a, 0x02);
+        assert_eq!(state.cc.z, 0x00);
+        emulate_8080_op(&mut state); // JMP
+        assert_eq!(state.pc, 0x02);
+        emulate_8080_op(&mut state); // JM
+        assert_eq!(state.pc, 0x05);
+        emulate_8080_op(&mut state); // DCR A
+        assert_eq!(state.a, 0x01);
+        assert_eq!(state.cc.z, 0x00);
+        emulate_8080_op(&mut state); // JMP
+        assert_eq!(state.pc, 0x02);
+        emulate_8080_op(&mut state); // JM
+        assert_eq!(state.pc, 0x05);
+        emulate_8080_op(&mut state); // DCR A
+        assert_eq!(state.a, 0x00);
+        assert_eq!(state.cc.z, 0x01);
+        emulate_8080_op(&mut state); // JMP
+        assert_eq!(state.pc, 0x02);
+        emulate_8080_op(&mut state); // JM
+        assert_eq!(state.pc, 0x05);
+        emulate_8080_op(&mut state); // DCR A
+        assert_eq!(state.a, 0xff);
+        assert_eq!(state.cc.z, 0x00);
+        emulate_8080_op(&mut state); // JMP
+        assert_eq!(state.pc, 0x02);
+        emulate_8080_op(&mut state); // JM
+        assert_eq!(state.pc, 0x10);
+    }
 }
