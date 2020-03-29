@@ -675,7 +675,16 @@ fn emulate_8080_op(state: &mut State8080) {
         0xbd => unimplemented_instruction(state),
         0xbe => unimplemented_instruction(state),
         0xbf => unimplemented_instruction(state),
-        0xc0 => unimplemented_instruction(state),
+        0xc0 => {
+            if state.cc.z != 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xc1 => unimplemented_instruction(state),
         0xc2 => {
             if state.cc.z == 0 {
@@ -693,12 +702,36 @@ fn emulate_8080_op(state: &mut State8080) {
             let low_address = state.memory[offset + 1] as u16;
             state.pc = high_address | low_address;
         },
-        0xc4 => unimplemented_instruction(state),
+        0xc4 => {
+            if state.cc.z != 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xc5 => unimplemented_instruction(state),
         0xc6 => unimplemented_instruction(state),
         0xc7 => unimplemented_instruction(state),
-        0xc8 => unimplemented_instruction(state),
-        0xc9 => unimplemented_instruction(state),
+        0xc8 => {
+            if state.cc.z == 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
+        0xc9 => {
+            let high_address = state.memory[state.sp as usize] as u16;
+            let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+            state.pc = high_address | low_address;
+            state.sp += 2;
+        },
         0xca => {
             if state.cc.z != 0 {
                 let offset: usize = state.pc as usize;
@@ -710,11 +743,36 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xcb => unimplemented_instruction(state),
-        0xcc => unimplemented_instruction(state),
-        0xcd => unimplemented_instruction(state),
+        0xcc => {
+            if state.cc.z == 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
+        0xcd => {
+            let ret: u16 = state.pc + 2;
+            state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+            state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+            state.sp = state.sp - 2;
+            state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+        },
         0xce => unimplemented_instruction(state),
         0xcf => unimplemented_instruction(state),
-        0xd0 => unimplemented_instruction(state),
+        0xd0 => {
+            if state.cc.cy == 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xd1 => unimplemented_instruction(state),
         0xd2 => {
             if state.cc.cy == 0 {
@@ -727,11 +785,30 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xd3 => unimplemented_instruction(state),
-        0xd4 => unimplemented_instruction(state),
+        0xd4 => {
+            if state.cc.cy != 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xd5 => unimplemented_instruction(state),
         0xd6 => unimplemented_instruction(state),
         0xd7 => unimplemented_instruction(state),
-        0xd8 => unimplemented_instruction(state),
+        0xd8 => {
+            if state.cc.cy != 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xd9 => unimplemented_instruction(state),
         0xda => {
             if state.cc.cy != 0 {
@@ -744,11 +821,30 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xdb => unimplemented_instruction(state),
-        0xdc => unimplemented_instruction(state),
+        0xdc => {
+            if state.cc.cy == 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xdd => unimplemented_instruction(state),
         0xde => unimplemented_instruction(state),
         0xdf => unimplemented_instruction(state),
-        0xe0 => unimplemented_instruction(state),
+        0xe0 => {
+            if state.cc.p == 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xe1 => unimplemented_instruction(state),
         0xe2 => {
             if state.cc.p == 0 {
@@ -761,11 +857,30 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xe3 => unimplemented_instruction(state),
-        0xe4 => unimplemented_instruction(state),
+        0xe4 => {
+            if state.cc.p == 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xe5 => unimplemented_instruction(state),
         0xe6 => unimplemented_instruction(state),
         0xe7 => unimplemented_instruction(state),
-        0xe8 => unimplemented_instruction(state),
+        0xe8 => {
+            if state.cc.p != 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xe9 => unimplemented_instruction(state),
         0xea => {
             if state.cc.p != 0 {
@@ -778,11 +893,30 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xeb => unimplemented_instruction(state),
-        0xec => unimplemented_instruction(state),
+        0xec => {
+            if state.cc.p != 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xed => unimplemented_instruction(state),
         0xee => unimplemented_instruction(state),
         0xef => unimplemented_instruction(state),
-        0xf0 => unimplemented_instruction(state),
+        0xf0 => {
+            if state.cc.s == 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xf1 => unimplemented_instruction(state),
         0xf2 => {
             if state.cc.s == 0 {
@@ -795,11 +929,30 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xf3 => unimplemented_instruction(state),
-        0xf4 => unimplemented_instruction(state),
+        0xf4 => {
+            if state.cc.s == 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xf5 => unimplemented_instruction(state),
         0xf6 => unimplemented_instruction(state),
         0xf7 => unimplemented_instruction(state),
-        0xf8 => unimplemented_instruction(state),
+        0xf8 => {
+            if state.cc.s != 0 {
+                let high_address = state.memory[state.sp as usize] as u16;
+                let low_address = (state.memory[state.sp as usize + 1] as u16) << 8;
+                state.pc = high_address | low_address;
+                state.sp += 2;
+            } else {
+                state.pc += 2;
+            }
+        },
         0xf9 => unimplemented_instruction(state),
         0xfa => {
             if state.cc.s != 0 {
@@ -812,7 +965,17 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xfb => unimplemented_instruction(state),
-        0xfc => unimplemented_instruction(state),
+        0xfc => {
+            if state.cc.s != 0 {
+                let ret: u16 = state.pc + 2;
+                state.memory[state.sp as usize- 1] = ((ret >> 8) & 0xff) as u8;
+                state.memory[state.sp as usize- 2] = (ret & 0xff) as u8;
+                state.sp = state.sp - 2;
+                state.pc = ((state.memory[state.pc as usize + 2] as u16) << 8) | state.memory[state.pc as usize + 1] as u16
+            } else {
+                state.pc += 2;
+            }
+        },
         0xfd => unimplemented_instruction(state),
         0xfe => unimplemented_instruction(state),
         0xff => unimplemented_instruction(state),
