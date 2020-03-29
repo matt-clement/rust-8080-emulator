@@ -33,8 +33,12 @@ fn unimplemented_instruction(state: &State8080) -> ! {
 fn emulate_8080_op(state: &mut State8080) {
     let opcode: u8 = state.memory[state.pc as usize];
     match opcode {
-        0x00 => unimplemented_instruction(state),
-        0x01 => unimplemented_instruction(state),
+        0x00 => {},
+        0x01 => {
+            state.c = state.memory[state.pc as usize + 1];
+            state.b = state.memory[state.pc as usize + 2];
+            state.pc += 2;
+        },
         0x02 => unimplemented_instruction(state),
         0x03 => unimplemented_instruction(state),
         0x04 => unimplemented_instruction(state),
@@ -98,8 +102,8 @@ fn emulate_8080_op(state: &mut State8080) {
         0x3e => unimplemented_instruction(state),
         0x3f => unimplemented_instruction(state),
         0x40 => unimplemented_instruction(state),
-        0x41 => unimplemented_instruction(state),
-        0x42 => unimplemented_instruction(state),
+        0x41 => state.b = state.c,
+        0x42 => state.b = state.d,
         0x43 => unimplemented_instruction(state),
         0x44 => unimplemented_instruction(state),
         0x45 => unimplemented_instruction(state),
@@ -161,7 +165,35 @@ fn emulate_8080_op(state: &mut State8080) {
         0x7d => unimplemented_instruction(state),
         0x7e => unimplemented_instruction(state),
         0x7f => unimplemented_instruction(state),
-        0x80 => unimplemented_instruction(state),
+        0x80 => {
+            let answer: u16 = state.a as u16 + state.b as u16;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+
+            // Zero flag: if the result is zero set the flag, else clear it
+            if masked_answer == 0 {
+                state.cc.z = 1;
+            } else {
+                state.cc.z = 0;
+            }
+
+            // Sign flag: if bit 7 is 1 set the flag, else clear it
+            if (answer & 0x80) == 0x80 {
+                state.cc.s = 1;
+            } else {
+                state.cc.s = 0;
+            }
+
+            // Carry flag
+            if answer > 0xff {
+                state.cc.cy = 1;
+            } else {
+                state.cc.cy = 0;
+            }
+
+            state.cc.p = parity(masked_answer);
+
+            state.a = masked_answer;
+        },
         0x81 => unimplemented_instruction(state),
         0x82 => unimplemented_instruction(state),
         0x83 => unimplemented_instruction(state),
@@ -291,6 +323,10 @@ fn emulate_8080_op(state: &mut State8080) {
         0xff => unimplemented_instruction(state),
     }
     state.pc += 1;
+}
+
+fn parity(x: u8) -> u8 {
+    unimplemented!()
 }
 
 fn main() {
