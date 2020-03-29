@@ -600,14 +600,71 @@ fn emulate_8080_op(state: &mut State8080) {
             state.cc.p = parity(answer);
             state.a = answer;
         },
-        0xb0 => unimplemented_instruction(state),
-        0xb1 => unimplemented_instruction(state),
-        0xb2 => unimplemented_instruction(state),
-        0xb3 => unimplemented_instruction(state),
-        0xb4 => unimplemented_instruction(state),
-        0xb5 => unimplemented_instruction(state),
-        0xb6 => unimplemented_instruction(state),
-        0xb7 => unimplemented_instruction(state),
+        0xb0 => {
+            let answer: u8 = state.a | state.b;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb1 => {
+            let answer: u8 = state.a | state.c;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb2 => {
+            let answer: u8 = state.a | state.d;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb3 => {
+            let answer: u8 = state.a | state.e;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb4 => {
+            let answer: u8 = state.a | state.h;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb5 => {
+            let answer: u8 = state.a | state.l;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb6 => {
+            let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
+            let answer: u8 = state.a | state.memory[offset as usize];
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0xb7 => {
+            let answer: u8 = state.a | state.a;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 }; // TODO: Does this make sense for bitwise operations?
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
         0xb8 => unimplemented_instruction(state),
         0xb9 => unimplemented_instruction(state),
         0xba => unimplemented_instruction(state),
