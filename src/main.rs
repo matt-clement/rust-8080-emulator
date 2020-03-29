@@ -326,70 +326,112 @@ fn emulate_8080_op(state: &mut State8080) {
             state.pc += 1;
         },
         0x3f => unimplemented_instruction(state),
-        0x40 => unimplemented_instruction(state),
+        0x40 => state.b = state.b,
         0x41 => state.b = state.c,
         0x42 => state.b = state.d,
-        0x43 => unimplemented_instruction(state),
-        0x44 => unimplemented_instruction(state),
-        0x45 => unimplemented_instruction(state),
-        0x46 => unimplemented_instruction(state),
-        0x47 => unimplemented_instruction(state),
-        0x48 => unimplemented_instruction(state),
-        0x49 => unimplemented_instruction(state),
-        0x4a => unimplemented_instruction(state),
-        0x4b => unimplemented_instruction(state),
-        0x4c => unimplemented_instruction(state),
-        0x4d => unimplemented_instruction(state),
-        0x4e => unimplemented_instruction(state),
-        0x4f => unimplemented_instruction(state),
-        0x50 => unimplemented_instruction(state),
-        0x51 => unimplemented_instruction(state),
-        0x52 => unimplemented_instruction(state),
-        0x53 => unimplemented_instruction(state),
-        0x54 => unimplemented_instruction(state),
-        0x55 => unimplemented_instruction(state),
-        0x56 => unimplemented_instruction(state),
-        0x57 => unimplemented_instruction(state),
-        0x58 => unimplemented_instruction(state),
-        0x59 => unimplemented_instruction(state),
-        0x5a => unimplemented_instruction(state),
-        0x5b => unimplemented_instruction(state),
-        0x5c => unimplemented_instruction(state),
-        0x5d => unimplemented_instruction(state),
-        0x5e => unimplemented_instruction(state),
-        0x5f => unimplemented_instruction(state),
-        0x60 => unimplemented_instruction(state),
-        0x61 => unimplemented_instruction(state),
-        0x62 => unimplemented_instruction(state),
-        0x63 => unimplemented_instruction(state),
-        0x64 => unimplemented_instruction(state),
-        0x65 => unimplemented_instruction(state),
-        0x66 => unimplemented_instruction(state),
-        0x67 => unimplemented_instruction(state),
-        0x68 => unimplemented_instruction(state),
-        0x69 => unimplemented_instruction(state),
-        0x6a => unimplemented_instruction(state),
-        0x6b => unimplemented_instruction(state),
-        0x6c => unimplemented_instruction(state),
-        0x6d => unimplemented_instruction(state),
-        0x6e => unimplemented_instruction(state),
-        0x6f => unimplemented_instruction(state),
-        0x70 => unimplemented_instruction(state),
-        0x71 => unimplemented_instruction(state),
-        0x72 => unimplemented_instruction(state),
-        0x73 => unimplemented_instruction(state),
-        0x74 => unimplemented_instruction(state),
-        0x75 => unimplemented_instruction(state),
+        0x43 => state.b = state.e,
+        0x44 => state.b = state.h,
+        0x45 => state.b = state.l,
+        0x46 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.b = state.memory[address as usize];
+        },
+        0x47 => state.c = state.a,
+        0x48 => state.c = state.b,
+        0x49 => state.c = state.c,
+        0x4a => state.c = state.d,
+        0x4b => state.c = state.e,
+        0x4c => state.c = state.h,
+        0x4d => state.c = state.l,
+        0x4e => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.c = state.memory[address as usize];
+        },
+        0x4f => state.c = state.a,
+        0x50 => state.d = state.b,
+        0x51 => state.d = state.c,
+        0x52 => state.d = state.d,
+        0x53 => state.d = state.e,
+        0x54 => state.d = state.h,
+        0x55 => state.d = state.l,
+        0x56 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.d = state.memory[address as usize];
+        },
+        0x57 => state.d = state.a,
+        0x58 => state.e = state.b,
+        0x59 => state.e = state.c,
+        0x5a => state.e = state.d,
+        0x5b => state.e = state.e,
+        0x5c => state.e = state.h,
+        0x5d => state.e = state.l,
+        0x5e => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.e = state.memory[address as usize];
+        },
+        0x5f => state.e = state.a,
+        0x60 => state.h = state.b,
+        0x61 => state.h = state.c,
+        0x62 => state.h = state.d,
+        0x63 => state.h = state.e,
+        0x64 => state.h = state.h,
+        0x65 => state.h = state.l,
+        0x66 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.h = state.memory[address as usize];
+        },
+        0x67 => state.h = state.a,
+        0x68 => state.l = state.b,
+        0x69 => state.l = state.c,
+        0x6a => state.l = state.d,
+        0x6b => state.l = state.e,
+        0x6c => state.l = state.h,
+        0x6d => state.l = state.l,
+        0x6e => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.l = state.memory[address as usize];
+        },
+        0x6f => state.l = state.a,
+        0x70 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.b;
+        }
+        0x71 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.c;
+        },
+        0x72 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.d;
+        },
+        0x73 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.e;
+        },
+        0x74 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.h;
+        },
+        0x75 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.l;
+        },
         0x76 => unimplemented_instruction(state),
-        0x77 => unimplemented_instruction(state),
-        0x78 => unimplemented_instruction(state),
-        0x79 => unimplemented_instruction(state),
-        0x7a => unimplemented_instruction(state),
-        0x7b => unimplemented_instruction(state),
-        0x7c => unimplemented_instruction(state),
-        0x7d => unimplemented_instruction(state),
-        0x7e => unimplemented_instruction(state),
-        0x7f => unimplemented_instruction(state),
+        0x77 => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.memory[address as usize] = state.a;
+        },
+        0x78 => state.a = state.b,
+        0x79 => state.a = state.c,
+        0x7a => state.a = state.d,
+        0x7b => state.a = state.e,
+        0x7c => state.a = state.h,
+        0x7d => state.a = state.l,
+        0x7e => {
+            let address: u16 = ((state.h as u16) << 8) | state.l as u16;
+            state.a = state.memory[address as usize];
+        },
+        0x7f => state.a = state.a,
         0x80 => {
             let answer: u16 = state.a as u16 + state.b as u16;
             let masked_answer: u8 = (answer & 0xff) as u8;
@@ -1676,5 +1718,16 @@ mod test {
         state.e = 0x01;
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xde);
+    }
+
+    #[test]
+    fn test_mov_m_a() {
+        let mut state = empty_state();
+        state.memory = vec![0x77, 0x00];
+        state.a = 0xde;
+        state.h = 0x00;
+        state.l = 0x01;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x01], 0xde);
     }
 }
