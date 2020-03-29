@@ -1,6 +1,7 @@
 use std::io::prelude::*;
 use std::fs::File;
 
+#[derive(Debug)]
 struct ConditionCodes {
     z: u8,
     s: u8,
@@ -37,6 +38,7 @@ impl std::fmt::Debug for State8080 {
             .field("l", &self.l)
             .field("sp", &self.sp)
             .field("pc", &self.pc)
+            .field("cc", &self.cc)
             .finish()
     }
 }
