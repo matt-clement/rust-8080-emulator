@@ -265,7 +265,7 @@ fn emulate_8080_op(state: &mut State8080) {
         0x2f => unimplemented_instruction(state),
         0x30 => unimplemented_instruction(state),
         0x31 => {
-            state.sp = ((state.memory[program_counter + 1] as u16) << 8) | state.memory[program_counter + 2] as u16;
+            state.sp = ((state.memory[program_counter + 2] as u16) << 8) | state.memory[program_counter + 1] as u16;
             state.pc += 2;
         },
         0x32 => unimplemented_instruction(state),
