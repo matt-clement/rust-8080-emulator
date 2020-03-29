@@ -123,7 +123,11 @@ fn emulate_8080_op(state: &mut State8080) {
         },
         0x0f => unimplemented_instruction(state),
         0x10 => unimplemented_instruction(state),
-        0x11 => unimplemented_instruction(state),
+        0x11 => {
+            state.d = state.memory[program_counter + 1];
+            state.e = state.memory[program_counter + 2];
+            state.pc += 2;
+        },
         0x12 => unimplemented_instruction(state),
         0x13 => {
             let result = (((state.d as u16) << 8) | state.e as u16) + 1;
