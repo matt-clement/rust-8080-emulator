@@ -43,7 +43,15 @@ fn emulate_8080_op(state: &mut State8080) {
         },
         0x02 => unimplemented_instruction(state),
         0x03 => unimplemented_instruction(state),
-        0x04 => unimplemented_instruction(state),
+        0x04 => {
+            let answer: u16 = (state.b as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x05 => unimplemented_instruction(state),
         0x06 => unimplemented_instruction(state),
         0x07 => unimplemented_instruction(state),
@@ -51,7 +59,15 @@ fn emulate_8080_op(state: &mut State8080) {
         0x09 => unimplemented_instruction(state),
         0x0a => unimplemented_instruction(state),
         0x0b => unimplemented_instruction(state),
-        0x0c => unimplemented_instruction(state),
+        0x0c => {
+            let answer: u16 = (state.c as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x0d => unimplemented_instruction(state),
         0x0e => unimplemented_instruction(state),
         0x0f => unimplemented_instruction(state),
@@ -59,7 +75,15 @@ fn emulate_8080_op(state: &mut State8080) {
         0x11 => unimplemented_instruction(state),
         0x12 => unimplemented_instruction(state),
         0x13 => unimplemented_instruction(state),
-        0x14 => unimplemented_instruction(state),
+        0x14 => {
+            let answer: u16 = (state.d as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x15 => unimplemented_instruction(state),
         0x16 => unimplemented_instruction(state),
         0x17 => unimplemented_instruction(state),
@@ -67,7 +91,15 @@ fn emulate_8080_op(state: &mut State8080) {
         0x19 => unimplemented_instruction(state),
         0x1a => unimplemented_instruction(state),
         0x1b => unimplemented_instruction(state),
-        0x1c => unimplemented_instruction(state),
+        0x1c => {
+            let answer: u16 = (state.e as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x1d => unimplemented_instruction(state),
         0x1e => unimplemented_instruction(state),
         0x1f => unimplemented_instruction(state),
@@ -75,7 +107,15 @@ fn emulate_8080_op(state: &mut State8080) {
         0x21 => unimplemented_instruction(state),
         0x22 => unimplemented_instruction(state),
         0x23 => unimplemented_instruction(state),
-        0x24 => unimplemented_instruction(state),
+        0x24 => {
+            let answer: u16 = (state.h as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x25 => unimplemented_instruction(state),
         0x26 => unimplemented_instruction(state),
         0x27 => unimplemented_instruction(state),
@@ -83,7 +123,15 @@ fn emulate_8080_op(state: &mut State8080) {
         0x29 => unimplemented_instruction(state),
         0x2a => unimplemented_instruction(state),
         0x2b => unimplemented_instruction(state),
-        0x2c => unimplemented_instruction(state),
+        0x2c => {
+            let answer: u16 = (state.l as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x2d => unimplemented_instruction(state),
         0x2e => unimplemented_instruction(state),
         0x2f => unimplemented_instruction(state),
@@ -91,7 +139,16 @@ fn emulate_8080_op(state: &mut State8080) {
         0x31 => unimplemented_instruction(state),
         0x32 => unimplemented_instruction(state),
         0x33 => unimplemented_instruction(state),
-        0x34 => unimplemented_instruction(state),
+        0x34 => {
+            let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
+            let answer: u16 = (state.a as u16) + state.memory[offset as usize] as u16;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x35 => unimplemented_instruction(state),
         0x36 => unimplemented_instruction(state),
         0x37 => unimplemented_instruction(state),
@@ -99,7 +156,15 @@ fn emulate_8080_op(state: &mut State8080) {
         0x39 => unimplemented_instruction(state),
         0x3a => unimplemented_instruction(state),
         0x3b => unimplemented_instruction(state),
-        0x3c => unimplemented_instruction(state),
+        0x3c => {
+            let answer: u16 = (state.a as u16) + 1;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.h = masked_answer;
+        },
         0x3d => unimplemented_instruction(state),
         0x3e => unimplemented_instruction(state),
         0x3f => unimplemented_instruction(state),
