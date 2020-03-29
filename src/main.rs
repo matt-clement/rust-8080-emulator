@@ -96,7 +96,10 @@ fn emulate_8080_op(state: &mut State8080) {
             state.h = ((result & 0xff00) >> 8) as u8;
             state.l = (result & 0x00ff) as u8;
         },
-        0x0a => unimplemented_instruction(state),
+        0x0a => {
+            let address = ((state.b as u16) << 8) | state.c as u16;
+            state.a = state.memory[address as usize];
+        },
         0x0b => {
             let result = (((state.b as u16) << 8) | state.c as u16) - 1;
             state.b = ((result & 0xff00) >> 8) as u8;
@@ -163,7 +166,10 @@ fn emulate_8080_op(state: &mut State8080) {
             state.h = ((result & 0xff00) >> 8) as u8;
             state.l = (result & 0x00ff) as u8;
         },
-        0x1a => unimplemented_instruction(state),
+        0x1a => {
+            let address = ((state.d as u16) << 8) | state.e as u16;
+            state.a = state.memory[address as usize];
+        },
         0x1b => {
             let result = (((state.d as u16) << 8) | state.e as u16) - 1;
             state.d = ((result & 0xff00) >> 8) as u8;
@@ -1659,5 +1665,16 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.b, 0xde);
         assert_eq!(state.c, 0xad);
+    }
+
+    #[test]
+    fn test_ldax_d() {
+        let mut state = empty_state();
+        state.memory = vec![0x1a, 0xde, 0x0e, 0xad];
+        state.a = 0x00;
+        state.d = 0x00;
+        state.e = 0x01;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xde);
     }
 }
