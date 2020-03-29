@@ -1752,4 +1752,22 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.memory[0x01], 0xde);
     }
+
+    #[test]
+    fn test_jnz_no_jump() {
+        let mut state = empty_state();
+        state.memory = vec![0xc2, 0x00, 0x00, 0x00, 0x00, 0x00];
+        state.cc.z = 1;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.pc, 0x03);
+    }
+
+    #[test]
+    fn test_jnz_jump() {
+        let mut state = empty_state();
+        state.memory = vec![0xc2, 0x04, 0x00, 0x00, 0x00, 0x00];
+        state.cc.z = 0;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.pc, 0x04);
+    }
 }
