@@ -331,22 +331,145 @@ fn emulate_8080_op(state: &mut State8080) {
             state.cc.p = parity(masked_answer);
             state.a = masked_answer;
         },
-        0x90 => unimplemented_instruction(state),
-        0x91 => unimplemented_instruction(state),
-        0x92 => unimplemented_instruction(state),
-        0x93 => unimplemented_instruction(state),
-        0x94 => unimplemented_instruction(state),
-        0x95 => unimplemented_instruction(state),
-        0x96 => unimplemented_instruction(state),
-        0x97 => unimplemented_instruction(state),
-        0x98 => unimplemented_instruction(state),
-        0x99 => unimplemented_instruction(state),
-        0x9a => unimplemented_instruction(state),
-        0x9b => unimplemented_instruction(state),
-        0x9c => unimplemented_instruction(state),
-        0x9d => unimplemented_instruction(state),
-        0x9e => unimplemented_instruction(state),
-        0x9f => unimplemented_instruction(state),
+        0x90 => {
+            let answer: u8 = state.a - state.b;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.b { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x91 => {
+            let answer: u8 = state.a - state.c;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.c { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x92 => {
+            let answer: u8 = state.a - state.d;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.d { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x93 => {
+            let answer: u8 = state.a - state.e;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.e { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x94 => {
+            let answer: u8 = state.a - state.h;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.h { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x95 => {
+            let answer: u8 = state.a - state.l;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.l { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x96 => {
+            let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
+            let subtrahend: u8 = state.memory[offset as usize];
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x97 => {
+            let answer: u8 = state.a - state.a;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x98 => {
+            let subtrahend: u8 = state.b + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x99 => {
+            let subtrahend: u8 = state.c + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x9a => {
+            let subtrahend: u8 = state.d + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x9b => {
+            let subtrahend: u8 = state.e + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x9c => {
+            let subtrahend: u8 = state.h + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x9d => {
+            let subtrahend: u8 = state.l + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x9e => {
+            let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
+            let subtrahend: u8 = state.memory[offset as usize] + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
+        0x9f => {
+            let subtrahend: u8 = state.a + state.cc.cy;
+            let answer: u8 = state.a - subtrahend;
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+        },
         0xa0 => unimplemented_instruction(state),
         0xa1 => unimplemented_instruction(state),
         0xa2 => unimplemented_instruction(state),
