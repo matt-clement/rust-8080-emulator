@@ -1423,7 +1423,7 @@ fn disassemble_opcode(src: &[u8], pc: usize) -> (String, usize) {
 }
 
 mod test {
-    use super::*;
+    #[allow(unused)] use super::*;
 
     #[test]
     fn dothething() {
