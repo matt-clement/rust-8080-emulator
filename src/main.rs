@@ -310,7 +310,13 @@ fn emulate_8080_op(state: &mut State8080) {
             state.h = ((result & 0xff00) >> 8) as u8;
             state.l = (result & 0x00ff) as u8;
         },
-        0x3a => unimplemented_instruction(state),
+        0x3a => {
+            let high_address = (state.memory[program_counter + 2] as u16) << 8;
+            let low_address = state.memory[program_counter + 1] as u16;
+            let address: usize = (high_address | low_address) as usize;
+            state.a = state.memory[address];
+            state.pc += 2;
+        },
         0x3b => {
             state.sp = state.sp.wrapping_sub(1);
         },
@@ -1845,6 +1851,17 @@ mod test {
         state.pc = 0;
         emulate_8080_op(&mut state);
         assert_eq!(state.memory[0x0003], 0x09);
+        assert_eq!(state.pc, 0x03);
+    }
+
+    #[test]
+    fn test_lda() {
+        let mut state = empty_state();
+        state.memory = vec![0x3a, 0x03, 0x00, 0x09];
+        state.a = 0x00;
+        state.pc = 0;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x09);
         assert_eq!(state.pc, 0x03);
     }
 }
