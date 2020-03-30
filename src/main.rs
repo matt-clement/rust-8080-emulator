@@ -1159,7 +1159,14 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xe3 => unimplemented_instruction(state),
+        0xe3 => {
+            let new_l = state.memory[state.sp as usize];
+            let new_h = state.memory[state.sp as usize + 1];
+            state.memory[state.sp as usize] = state.l;
+            state.memory[state.sp as usize + 1] = state.h;
+            state.h = new_h;
+            state.l = new_l;
+        },
         0xe4 => {
             if state.cc.p == 0 {
                 let ret: u16 = program_counter as u16 + 2;
@@ -2021,5 +2028,20 @@ mod test {
         state.l = 0x6c;
         emulate_8080_op(&mut state);
         assert_eq!(state.sp, 0x506c);
+    }
+
+    #[test]
+    fn test_xthl() {
+        let mut state = empty_state();
+        state.memory = vec![0xe3, 0xf0, 0x0d];
+        state.sp = 0x01;
+        state.h = 0x0b;
+        state.l = 0x3c;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x01], 0x3c);
+        assert_eq!(state.memory[0x02], 0x0b);
+        assert_eq!(state.h, 0x0d);
+        assert_eq!(state.l, 0xf0);
+        assert_eq!(state.sp, 0x01);
     }
 }
