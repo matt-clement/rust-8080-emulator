@@ -1053,7 +1053,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xd3 => unimplemented_instruction(state),
+        0xd3 => {
+            // TODO: IO
+            // This is the OUT instruction, for now just skip data byte
+            state.pc += 1;
+        },
         0xd4 => {
             if state.cc.cy != 0 {
                 let ret: u16 = program_counter as u16 + 2;
@@ -1088,7 +1092,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xdb => unimplemented_instruction(state),
+        0xdb => {
+            // TODO: IO
+            // This is the IN instruction, for now just skip data byte
+            state.pc += 1;
+        },
         0xdc => {
             if state.cc.cy == 0 {
                 let ret: u16 = program_counter as u16 + 2;
