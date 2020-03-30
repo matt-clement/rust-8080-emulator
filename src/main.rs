@@ -966,7 +966,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xc1 => unimplemented_instruction(state),
+        0xc1 => {
+            state.c = state.memory[state.sp as usize];
+            state.b = state.memory[state.sp as usize + 1];
+            state.sp += 2;
+        },
         0xc2 => {
             if state.cc.z == 0 {
                 let high_address = (state.memory[program_counter + 2] as u16) << 8;
@@ -992,7 +996,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xc5 => unimplemented_instruction(state),
+        0xc5 => {
+            state.memory[state.sp as usize - 1] = state.b;
+            state.memory[state.sp as usize - 2] = state.c;
+            state.sp -= 2;
+        },
         0xc6 => unimplemented_instruction(state),
         0xc7 => unimplemented_instruction(state),
         0xc8 => {
@@ -1051,7 +1059,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xd1 => unimplemented_instruction(state),
+        0xd1 => {
+            state.e = state.memory[state.sp as usize];
+            state.d = state.memory[state.sp as usize + 1];
+            state.sp += 2;
+        },
         0xd2 => {
             if state.cc.cy == 0 {
                 let high_address = (state.memory[program_counter + 2] as u16) << 8;
@@ -1077,7 +1089,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xd5 => unimplemented_instruction(state),
+        0xd5 => {
+            state.memory[state.sp as usize - 1] = state.d;
+            state.memory[state.sp as usize - 2] = state.e;
+            state.sp -= 2;
+        },
         0xd6 => unimplemented_instruction(state),
         0xd7 => unimplemented_instruction(state),
         0xd8 => {
@@ -1129,7 +1145,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xe1 => unimplemented_instruction(state),
+        0xe1 => {
+            state.l = state.memory[state.sp as usize];
+            state.h = state.memory[state.sp as usize + 1];
+            state.sp += 2;
+        },
         0xe2 => {
             if state.cc.p == 0 {
                 let high_address = (state.memory[program_counter + 2] as u16) << 8;
@@ -1151,7 +1171,11 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xe5 => unimplemented_instruction(state),
+        0xe5 => {
+            state.memory[state.sp as usize - 1] = state.h;
+            state.memory[state.sp as usize - 2] = state.l;
+            state.sp -= 2;
+        },
         0xe6 => unimplemented_instruction(state),
         0xe7 => unimplemented_instruction(state),
         0xe8 => {
@@ -1199,7 +1223,16 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xf1 => unimplemented_instruction(state),
+        0xf1 => {
+            state.a = state.memory[state.sp as usize + 1];
+            let psw: u8 = state.memory[state.sp as usize];
+            state.cc.cy = if 0x01 == (psw & 0x01) { 1 } else { 0 };
+            state.cc.p = if 0x04 == (psw & 0x04) { 1 } else { 0 };
+            state.cc.ac = if 0x10 == (psw & 0x10) { 1 } else { 0 };
+            state.cc.z = if 0x40 == (psw & 0x40) { 1 } else { 0 };
+            state.cc.s = if 0x80 == (psw & 0x80) { 1 } else { 0 };
+            state.sp += 2;
+        },
         0xf2 => {
             if state.cc.s == 0 {
                 let high_address = (state.memory[program_counter + 2] as u16) << 8;
@@ -1223,7 +1256,13 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xf5 => unimplemented_instruction(state),
+        0xf5 => {
+            state.memory[state.sp as usize -1] = state.a;
+            let cc = &state.cc;
+            let psw: u8 = cc.cy | cc.p << 2 | cc.ac << 4 | cc.z << 6 | cc.s << 7;
+            state.memory[state.sp as usize - 2] = psw;
+            state.sp -= 2;
+        },
         0xf6 => unimplemented_instruction(state),
         0xf7 => unimplemented_instruction(state),
         0xf8 => {
@@ -1865,5 +1904,109 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x09);
         assert_eq!(state.pc, 0x03);
+    }
+
+    #[test]
+    fn test_pop_b() {
+        let mut state = empty_state();
+        state.memory = vec![0xc1, 0xc3, 0xff];
+        state.sp = 0x01;
+        state.b = 0x00;
+        state.c = 0x00;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.b, 0xff);
+        assert_eq!(state.c, 0xc3);
+        assert_eq!(state.sp, 0x03);
+    }
+
+    #[test]
+    fn test_pop_h() {
+        let mut state = empty_state();
+        state.memory = vec![0xe1, 0x3d, 0x93];
+        state.sp = 0x01;
+        state.h = 0x00;
+        state.l = 0x00;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.h, 0x93);
+        assert_eq!(state.l, 0x3d);
+        assert_eq!(state.sp, 0x03);
+    }
+
+    #[test]
+    fn test_pop_psw() {
+        let mut state = empty_state();
+        state.memory = vec![0xf1, 0xc3, 0xff];
+        state.sp = 0x01;
+        state.a = 0x00;
+        state.cc.cy = 0x00;
+        state.cc.p = 0x00;
+        state.cc.ac = 0x00;
+        state.cc.z = 0x00;
+        state.cc.s = 0x00;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xff);
+        assert_eq!(state.cc.cy, 0x01);
+        assert_eq!(state.cc.p, 0x00);
+        assert_eq!(state.cc.ac, 0x00);
+        assert_eq!(state.cc.z, 0x01);
+        assert_eq!(state.cc.s, 0x01);
+        assert_eq!(state.sp, 0x03);
+    }
+
+    #[test]
+    fn test_push_psw() {
+        let mut state = empty_state();
+        state.memory = vec![0xf5, 0x00, 0x00];
+        state.sp = 0x03;
+        state.a = 0x47;
+        state.cc.cy = 0x01;
+        state.cc.p = 0x01;
+        state.cc.ac = 0x00;
+        state.cc.z = 0x01;
+        state.cc.s = 0x00;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x01], 0x45);
+        assert_eq!(state.memory[0x02], 0x47);
+        assert_eq!(state.sp, 0x01);
+    }
+
+    #[test]
+    fn test_push_pop_psw() {
+        let mut state = empty_state();
+        state.memory = vec![0xf5, 0xf1, 0x00, 0x00];
+        state.sp = 0x04;
+        state.a = 0x47;
+        state.cc.cy = 0x01;
+        state.cc.p = 0x01;
+        state.cc.ac = 0x00;
+        state.cc.z = 0x01;
+        state.cc.s = 0x00;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x02], 0x45);
+        assert_eq!(state.memory[0x03], 0x47);
+        assert_eq!(state.sp, 0x02);
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x47);
+        assert_eq!(state.cc.cy, 0x01);
+        assert_eq!(state.cc.p, 0x01);
+        assert_eq!(state.cc.ac, 0x00);
+        assert_eq!(state.cc.z, 0x01);
+        assert_eq!(state.cc.s, 0x00);
+        assert_eq!(state.sp, 0x04);
+    }
+
+    #[test]
+    fn test_push_d() {
+        let mut state = empty_state();
+        state.memory = vec![0xd5, 0x00, 0x00];
+        state.sp = 0x03;
+        state.d = 0x8f;
+        state.e = 0x9d;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x02], 0x8f);
+        assert_eq!(state.memory[0x01], 0x9d);
+        assert_eq!(state.sp, 0x01);
     }
 }
