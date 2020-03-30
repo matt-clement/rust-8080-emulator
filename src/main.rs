@@ -430,7 +430,9 @@ fn emulate_8080_op(state: &mut State8080) {
             let address: u16 = ((state.h as u16) << 8) | state.l as u16;
             state.memory[address as usize] = state.l;
         },
-        0x76 => unimplemented_instruction(state),
+        0x76 => {
+            std::process::exit(0);
+        },
         0x77 => {
             let address: u16 = ((state.h as u16) << 8) | state.l as u16;
             state.memory[address as usize] = state.a;
