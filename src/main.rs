@@ -1201,7 +1201,9 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xf3 => unimplemented_instruction(state),
+        0xf3 => {
+            state.int_enable = 0;
+        },
         0xf4 => {
             if state.cc.s == 0 {
                 let ret: u16 = program_counter as u16 + 2;
@@ -1236,7 +1238,9 @@ fn emulate_8080_op(state: &mut State8080) {
                 state.pc += 2;
             }
         },
-        0xfb => unimplemented_instruction(state),
+        0xfb => {
+            state.int_enable = 1;
+        },
         0xfc => {
             if state.cc.s != 0 {
                 let ret: u16 = program_counter as u16 + 2;
