@@ -15,6 +15,12 @@ fn unimplemented_instruction(_state: &State8080) -> ! {
     std::process::exit(1);
 }
 
+pub fn run(state: &mut State8080) {
+    loop {
+        emulate_8080_op(state);
+    }
+}
+
 pub fn emulate_8080_op(state: &mut State8080) {
     let program_counter: usize = state.program_counter() as usize;
     let opcode: u8 = state.memory[program_counter];

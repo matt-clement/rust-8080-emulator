@@ -17,7 +17,5 @@ fn main() {
     }
     let mut state = State8080::empty_state();
     state.memory = buffer;
-    loop {
-        emulator::emulate_8080_op(&mut state);
-    }
+    emulator::run(&mut state);
 }
