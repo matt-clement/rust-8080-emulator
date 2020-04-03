@@ -17,10 +17,41 @@ pub struct State8080 {
     pub h: u8,
     pub l: u8,
     pub sp: u16,
-    pub pc: u16,
+    pc: u16,
     pub memory: Vec<u8>,
     pub cc: ConditionCodes,
     pub int_enable: u8,
+}
+
+impl State8080 {
+    pub fn program_counter(&self) -> u16 {
+        self.pc
+    }
+
+    pub fn set_program_counter(&mut self, value: u16) {
+        self.pc = value;
+    }
+
+    pub fn increment_program_counter(&mut self, delta: u16) {
+        self.pc += delta;
+    }
+
+    pub fn empty_state() -> State8080 {
+        State8080 {
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            h: 0,
+            l: 0,
+            cc: ConditionCodes { ac: 0, cy: 0, p: 0, pad: 0, s: 0, z: 0 },
+            int_enable: 0,
+            memory: Vec::new(),
+            sp: 0,
+            pc: 0,
+        }
+    }
 }
 
 impl std::fmt::Debug for State8080 {
