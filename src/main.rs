@@ -4,7 +4,7 @@ use std::fs::File;
 mod disassembler;
 
 mod state_8080;
-use state_8080::{ConditionCodes, State8080};
+use state_8080::State8080;
 
 fn unimplemented_instruction(_state: &State8080) -> ! {
     eprintln!("Error: Unimplimented instruction");
