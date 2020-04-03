@@ -1,47 +1,8 @@
 use std::io::prelude::*;
 use std::fs::File;
 
-#[derive(Debug)]
-struct ConditionCodes {
-    z: u8,
-    s: u8,
-    p: u8,
-    cy: u8,
-    ac: u8,
-    pad: u8,
-}
-
-struct State8080 {
-    a: u8,
-    b: u8,
-    c: u8,
-    d: u8,
-    e: u8,
-    h: u8,
-    l: u8,
-    sp: u16,
-    pc: u16,
-    memory: Vec<u8>,
-    cc: ConditionCodes,
-    int_enable: u8,
-}
-
-impl std::fmt::Debug for State8080 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("State8080")
-            .field("a", &self.a)
-            .field("b", &self.b)
-            .field("c", &self.c)
-            .field("d", &self.d)
-            .field("e", &self.e)
-            .field("h", &self.h)
-            .field("l", &self.l)
-            .field("sp", &self.sp)
-            .field("pc", &self.pc)
-            .field("cc", &self.cc)
-            .finish()
-    }
-}
+mod state_8080;
+use state_8080::{ConditionCodes, State8080};
 
 fn unimplemented_instruction(_state: &State8080) -> ! {
     eprintln!("Error: Unimplimented instruction");
