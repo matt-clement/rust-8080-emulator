@@ -1227,7 +1227,7 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xf3 => {
-            state.int_enable = 0;
+            state.disable_interrupt();
         },
         0xf4 => {
             if state.cc.s == 0 {
@@ -1274,7 +1274,7 @@ fn emulate_8080_op(state: &mut State8080) {
             }
         },
         0xfb => {
-            state.int_enable = 1;
+            state.enable_interrupt();
         },
         0xfc => {
             if state.cc.s != 0 {

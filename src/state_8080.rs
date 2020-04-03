@@ -20,7 +20,7 @@ pub struct State8080 {
     pc: u16,
     pub memory: Vec<u8>,
     pub cc: ConditionCodes,
-    pub int_enable: u8,
+    int_enable: u8,
 }
 
 impl State8080 {
@@ -34,6 +34,14 @@ impl State8080 {
 
     pub fn increment_program_counter(&mut self, delta: u16) {
         self.pc += delta;
+    }
+
+    pub fn enable_interrupt(&mut self) {
+        self.int_enable = 1;
+    }
+
+    pub fn disable_interrupt(&mut self) {
+        self.int_enable = 0;
     }
 
     pub fn empty_state() -> State8080 {
