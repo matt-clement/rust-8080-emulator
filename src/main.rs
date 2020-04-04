@@ -10,6 +10,7 @@ use state_8080::State8080;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::rect::Rect;
 use std::time::Duration;
 
 fn main() {
@@ -22,23 +23,32 @@ fn main() {
       .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
+    // let texture_creator = canvas.texture_creator();
+    // let mut tex = texture_creator.create_texture_static(None, 800, 600).unwrap();
 
-    canvas.set_draw_color(Color::RGB(0, 255, 255));
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut i = 0;
     'running: loop {
         i = (i + 1) % 255;
-        canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
+        canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} |
+                Event::KeyDown { keycode: Some(Keycode::Q), ..} |
                 Event::KeyDown { keycode: Some(Keycode::Escape), ..} => {
                     break 'running
                 },
                 _ => {}
+            }
+        }
+        for y in 1..10 {
+            for x in 1..10 {
+                canvas.set_draw_color(Color::RGB(i % 0xff, x * 2 + i % 10, y + i % 20));
+                canvas.fill_rect(Rect::new(x as i32 * 20, y as i32 * 20, 10, 10)).unwrap();
             }
         }
         canvas.present();
