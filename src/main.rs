@@ -55,10 +55,11 @@ fn main() {
         }
         space_invaders_display::draw(&state, &mut canvas);
         canvas.present();
-        // Display is 60Hz, clock is 60MHz.
-        // TODO: This should be cycles, not ops
-        for _ in 0..1000 {
-            emulator::emulate_8080_op(&mut state);
+        // Display is 60Hz, clock is 60MHz, this is close enough for now I guess
+        let mut cycle_count = 0;
+        while cycle_count < 1000 {
+            cycle_count += emulator::emulate_8080_op(&mut state);
+
         }
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
