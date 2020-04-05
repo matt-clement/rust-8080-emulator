@@ -13,6 +13,9 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
+// Display is 60Hz, clock is 2MHz
+const CYCLES_PER_FRAME: u32 = 2_000_000 / 60;
+
 fn main() {
     let file_name = std::env::args().nth(1).expect("Pass file name as first argument");
     let mut file = File::open(&file_name).expect(&format!("Unable to open file '{}'", file_name));
@@ -55,9 +58,9 @@ fn main() {
         }
         space_invaders_display::draw(&state, &mut canvas);
         canvas.present();
-        // Display is 60Hz, clock is 60MHz, this is close enough for now I guess
+        // Display is 60Hz, clock is 2MHz, this is close enough for now I guess
         let mut cycle_count = 0;
-        while cycle_count < 1000 {
+        while cycle_count < CYCLES_PER_FRAME {
             cycle_count += emulator::emulate_8080_op(&mut state);
 
         }
