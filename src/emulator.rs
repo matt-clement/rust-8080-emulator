@@ -15,6 +15,7 @@ fn unimplemented_instruction(_state: &State8080) -> ! {
     std::process::exit(1);
 }
 
+#[allow(dead_code)]
 pub fn run(state: &mut State8080) {
     loop {
         emulate_8080_op(state);
