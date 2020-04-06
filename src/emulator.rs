@@ -1752,4 +1752,28 @@ mod test {
         assert_eq!(state.l, 0xf0);
         assert_eq!(state.sp, 0x01);
     }
+
+    #[test]
+    fn test_add_d() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x82];
+        state.a = 0x6c;
+        state.d = 0x2e;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x9a);
+        assert_eq!(state.cc.z, 0);
+        assert_eq!(state.cc.cy, 0);
+        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.s, 1);
+        // TODO: assert_eq!(state.cc.ac, 1);
+    }
+
+    #[test]
+    fn test_add_a() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x87];
+        state.a = 0x04;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x08);
+    }
 }
