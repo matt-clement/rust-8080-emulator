@@ -1041,7 +1041,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xcd => {
-            let ret: u16 = program_counter as u16 + 2;
+            let ret: u16 = program_counter as u16 + 3;
             state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
             state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
             state.sp = state.sp - 2;
