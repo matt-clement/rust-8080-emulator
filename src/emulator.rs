@@ -1776,4 +1776,37 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x08);
     }
+
+    #[test]
+    fn test_subroutine() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![
+            0x31, 0x00, 0x10, // Setup stack pointer
+            0xcd, 0x10, 0x00, // Call
+            0x06, 0x12, // Set register b
+            0x00, 0x00, // Padding
+            0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00,
+            0x0e, 0x24, // Set register c
+            0xc9, // Return
+        ];
+        while state.memory.len() < 4096 {
+            state.memory.push(0);
+        }
+        assert_eq!(state.b, 0x00);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.sp, 0x1000);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.sp, 0x0ffe);
+        assert_eq!(state.program_counter(), 0x10);
+        assert_eq!(state.c, 0x00);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.c, 0x24);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.program_counter(), 0x06);
+        assert_eq!(state.b, 0x00);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.b, 0x12);
+        assert_eq!(state.sp, 0x1000);
+    }
 }
