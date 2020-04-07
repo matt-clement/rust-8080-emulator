@@ -1323,7 +1323,34 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xfd => unimplemented_instruction(state),
-        0xfe => unimplemented_instruction(state),
+        0xfe => {
+            /*
+            let acc = state.a;
+            let immediate_data = state.memory[program_counter + 1];
+            let answer: u16 = (acc as u16).wrapping_sub(immediate_data as u16);
+            let masked_answer: u8 = answer as u8 & 0xff;
+            let same_sign = acc & 0x80 == immediate_data & 0x80;
+            let (carry_positive, carry_negative) = if same_sign { (1, 0) } else { (1, 0) };
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { carry_positive } else { carry_negative };
+            state.cc.p = parity(masked_answer);
+            state.increment_program_counter(1);
+            */
+
+            // The following aligns with implementations I've seen
+            // I still have to convince myself that it's right.
+            let answer: u8 = state.a.wrapping_sub(state.memory[program_counter + 1]);
+            let masked_answer: u8 = answer & 0xff;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.cc.cy = if state.a < state.memory[program_counter + 1] {
+                1
+            } else {
+                0
+            };
+        },
         0xff => unimplemented_instruction(state),
     }
     CYCLES[opcode as usize]
@@ -1808,5 +1835,15 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.b, 0x12);
         assert_eq!(state.sp, 0x1000);
+    }
+
+    #[test]
+    fn test_cpi() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xfe, 0xc0];
+        state.a = 0x4a;
+        emulate_8080_op(&mut state);
+        // TODO: assert_eq!(state.cc.cy, 0);
+        assert_eq!(state.cc.z, 0);
     }
 }
