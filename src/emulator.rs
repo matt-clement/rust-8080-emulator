@@ -1058,7 +1058,16 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let low_address = state.memory[program_counter + 1] as u16;
             state.set_program_counter(high_address | low_address);
         },
-        0xce => unimplemented_instruction(state),
+        0xce => {
+            let answer: u16 = (state.a as u16) + (state.memory[program_counter + 1] as u16) + state.cc.cy as u16;
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if answer > 0xff { 1 } else { 0 };
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+            state.increment_program_counter(1);
+        },
         0xcf => unimplemented_instruction(state),
         0xd0 => {
             if state.cc.cy == 0 {
@@ -1896,5 +1905,21 @@ mod test {
         // TODO: assert_eq!(state.cc.ac, 1);
         assert_eq!(state.cc.z, 0);
         assert_eq!(state.cc.s, 0);
+    }
+
+    #[test]
+    fn test_aci() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xce, 0xbe, 0xce, 0x42];
+        state.a = 0x56;
+
+        assert_eq!(state.cc.cy, 0);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x14);
+        assert_eq!(state.cc.cy, 1);
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x57);
+        assert_eq!(state.cc.cy, 0);
     }
 }
