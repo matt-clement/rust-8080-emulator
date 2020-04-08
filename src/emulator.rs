@@ -1166,7 +1166,16 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xdd => unimplemented_instruction(state),
-        0xde => unimplemented_instruction(state),
+        0xde => {
+            let subtrahend: u8 = state.memory[program_counter + 1].wrapping_add(state.cc.cy);
+            let answer: u8 = state.a.wrapping_sub(subtrahend);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
+            state.cc.p = parity(answer);
+            state.a = answer;
+            state.increment_program_counter(1);
+        }
         0xdf => unimplemented_instruction(state),
         0xe0 => {
             if state.cc.p == 0 {
@@ -1942,5 +1951,37 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xff);
         assert_eq!(state.cc.cy, 1);
+    }
+
+    #[test]
+    fn test_sbi() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xde, 0x01];
+        state.a = 0x00;
+        state.cc.cy = 0;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xff);
+        assert_eq!(state.cc.cy, 1);
+        assert_eq!(state.cc.s, 1);
+        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.z, 0);
+        // TODO: assert_eq!(state.cc.ac, 0);
+    }
+
+    #[test]
+    fn test_sbi_with_carry_bit() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xde, 0x01];
+        state.a = 0x00;
+        state.cc.cy = 1;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xfe);
+        assert_eq!(state.cc.cy, 1);
+        assert_eq!(state.cc.s, 1);
+        assert_eq!(state.cc.p, 0);
+        assert_eq!(state.cc.z, 0);
+        // TODO: assert_eq!(state.cc.ac, 0);
     }
 }
