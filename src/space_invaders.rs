@@ -104,6 +104,6 @@ fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
             }
         }
     }).unwrap();
-    canvas.copy(&tex1, None, None).unwrap();
-    canvas.copy(&tex2, None, None).unwrap();
+    canvas.copy_ex(&tex1, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
+    canvas.copy_ex(&tex2, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
 }
