@@ -1367,6 +1367,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             } else {
                 0
             };
+            state.increment_program_counter(1);
         },
         0xff => unimplemented_instruction(state),
     }
@@ -1862,6 +1863,7 @@ mod test {
         emulate_8080_op(&mut state);
         // TODO: assert_eq!(state.cc.cy, 0);
         assert_eq!(state.cc.z, 0);
+        assert_eq!(state.program_counter(), 2);
     }
 
     #[test]
