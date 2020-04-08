@@ -11,7 +11,7 @@ pub fn disassemble_opcode(src: &[u8], pc: usize) -> (String, usize) {
         0x05 => format!("DCR\tB"),
         0x06 => { opbytes = 2; format!("MVI\tB,#${:02x}", src[pc + 1]) },
         0x07 => format!("RLC"),
-        0x08 => format!("NOP\tB"),
+        0x08 => format!("NOP"),
         0x09 => format!("DAD\tB"),
         0x0a => format!("LDAX\tB"),
         0x0b => format!("DCX\tB"),
