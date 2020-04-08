@@ -1326,7 +1326,16 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.memory[state.sp as usize - 2] = psw;
             state.sp -= 2;
         },
-        0xf6 => unimplemented_instruction(state),
+        0xf6 => {
+            let answer: u16 = (state.a as u16) | (state.memory[program_counter + 1] as u16);
+            let masked_answer: u8 = (answer & 0xff) as u8;
+            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = 0;
+            state.cc.p = parity(masked_answer);
+            state.a = masked_answer;
+            state.increment_program_counter(1);
+        },
         0xf7 => unimplemented_instruction(state),
         0xf8 => {
             if state.cc.s != 0 {
@@ -1983,5 +1992,15 @@ mod test {
         assert_eq!(state.cc.p, 0);
         assert_eq!(state.cc.z, 0);
         // TODO: assert_eq!(state.cc.ac, 0);
+    }
+
+    #[test]
+    fn test_ori() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xf6, 0x0f];
+        state.a = 0xb5;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xbf);
     }
 }
