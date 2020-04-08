@@ -37,7 +37,7 @@ fn run_space_invaders(bin_file_name: &str) {
     let mut state = State8080::empty_state();
     state.memory = buffer;
 
-    space_invaders::start(&mut state);
+    space_invaders::start(state);
 }
 
 fn run_diag(bin_file_name: &str) {

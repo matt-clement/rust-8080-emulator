@@ -12,7 +12,42 @@ use sdl2::render::{Canvas, Texture};
 // Display is 60Hz, clock is 2MHz
 const CYCLES_PER_FRAME: u32 = 2_000_000 / 60;
 
-pub fn start(state: &mut State8080) {
+struct SpaceInvadersMachine {
+    state: State8080,
+
+    last_timer: f64,
+    next_interrupt: f64,
+    which_interrupt: i32,
+
+    // emulator_timer: ???,
+
+    shift_low: u8,
+    shift_high: u8,
+    shift_offset: u8,
+
+    in_port1: u8,
+    paused: bool,
+}
+
+impl SpaceInvadersMachine {
+    fn new(state: State8080) -> SpaceInvadersMachine {
+        SpaceInvadersMachine {
+            state: state,
+            last_timer: 0.0,
+            next_interrupt: 0.0,
+            which_interrupt: 0,
+            // timer?
+            shift_low: 0,
+            shift_high: 0,
+            shift_offset: 0,
+            in_port1: 0,
+            paused: false,
+        }
+    }
+}
+
+pub fn start(state: State8080) {
+    let mut machine = SpaceInvadersMachine::new(state);
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -42,15 +77,59 @@ pub fn start(state: &mut State8080) {
                 _ => {}
             }
         }
-        draw(&state, &mut canvas);
+        draw(&machine.state, &mut canvas);
         canvas.present();
         // Display is 60Hz, clock is 2MHz, this is close enough for now I guess
         let mut cycle_count = 0;
         while cycle_count < CYCLES_PER_FRAME {
-            cycle_count += emulator::emulate_8080_op(state);
+            let program_counter = machine.state.program_counter() as usize;
+            let current_opcode = machine.state.memory[program_counter];
+            // Special handling for interrupts. Eventually it would be nice to
+            // have a way to do this without basically implementing instruction
+            // handlerss outside of the main CPU emulator
+            match current_opcode {
+                // Special handling for IN
+                0xdb => {
+                    let port_number = machine.state.memory[program_counter + 1];
+                    handle_in(&mut machine, port_number);
+                    machine.state.increment_program_counter(2);
+                },
+                // Special handling for OUT
+                0xd3 => {
+                    let port_number = machine.state.memory[program_counter + 1];
+                    let value = machine.state.a;
+                    handle_out(&mut machine, port_number, value);
+                    machine.state.increment_program_counter(2);
+                },
+                _ => cycle_count += emulator::emulate_8080_op(&mut machine.state),
+            }
 
         }
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+    }
+}
+
+fn handle_in(machine: &mut SpaceInvadersMachine, port: u8) {
+    match port {
+        3 => {
+            let value: u16 = ((machine.shift_high as u16) << 8) | machine.shift_low as u16;
+            let masked_value: u8 = ((value >> (8 - machine.shift_offset)) & 0xff) as u8;
+            machine.state.a = masked_value;
+        },
+        _ => {},
+    }
+}
+
+fn handle_out(machine: &mut SpaceInvadersMachine, port: u8, value: u8) {
+    match port {
+        2 => {
+            machine.shift_offset = value & 0x7;
+        },
+        4 => {
+            machine.shift_low = machine.shift_high;
+            machine.shift_high = value;
+        }
+        _ => {},
     }
 }
 
