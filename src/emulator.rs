@@ -301,7 +301,9 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.memory[offset] = state.memory[program_counter + 1];
             state.increment_program_counter(1);
         },
-        0x37 => unimplemented_instruction(state),
+        0x37 => {
+            state.cc.cy = 1;
+        },
         0x38 => unimplemented_instruction(state),
         0x39 => {
             let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
