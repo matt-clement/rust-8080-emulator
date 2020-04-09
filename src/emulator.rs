@@ -197,7 +197,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.increment_program_counter(1);
         },
         0x1f => unimplemented_instruction(state),
-        0x20 => unimplemented_instruction(state),
+        0x20 => {},
         0x21 => {
             state.l = state.memory[program_counter + 1];
             state.h = state.memory[program_counter + 2];
