@@ -199,7 +199,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.e = state.memory[program_counter + 1];
             state.increment_program_counter(1);
         },
-        0x1f => unimplemented_instruction(state),
+        0x1f => {
+            let carry = state.cc.cy;
+            let carry_as_high_bit = (carry << 7) & 0x80;
+            let register_a_low_bit = state.a & 0x01;
+            state.cc.cy = register_a_low_bit;
+            state.a = ((state.a & 0x7f) >> 1) | carry_as_high_bit;
+        },
         0x20 => {},
         0x21 => {
             state.l = state.memory[program_counter + 1];
@@ -2086,5 +2092,17 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xe5);
         assert_eq!(state.cc.cy, 1);
+    }
+
+    #[test]
+    fn test_rar() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x1f];
+        state.a = 0x6a;
+        state.cc.cy = 1;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xb5);
+        assert_eq!(state.cc.cy, 0);
     }
 }
