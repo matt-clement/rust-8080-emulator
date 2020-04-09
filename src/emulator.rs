@@ -1380,7 +1380,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
-        0xf7 => unimplemented_instruction(state),
+        0xf7 => {
+            let ret: u16 = state.program_counter() + 2;
+            state.memory[state.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
+            state.memory[state.sp as usize - 2] = (ret & 0xff) as u8;
+            state.sp -= 2;
+            state.set_program_counter(0x30);
+        },
         0xf8 => {
             if state.cc.s != 0 {
                 let high_address = state.memory[state.sp as usize] as u16;
