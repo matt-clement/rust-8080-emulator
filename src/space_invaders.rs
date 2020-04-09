@@ -1,7 +1,7 @@
 use super::state_8080::State8080;
 use super::emulator;
 
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -15,7 +15,7 @@ const CYCLES_PER_FRAME: u32 = 2_000_000 / 60;
 struct SpaceInvadersMachine {
     state: State8080,
 
-    last_timer: f64,
+    last_timer: Instant,
     next_interrupt: f64,
     which_interrupt: i32,
 
@@ -33,7 +33,7 @@ impl SpaceInvadersMachine {
     fn new(state: State8080) -> SpaceInvadersMachine {
         SpaceInvadersMachine {
             state: state,
-            last_timer: 0.0,
+            last_timer: Instant::now(), // Should this be an Option<Instant>?
             next_interrupt: 0.0,
             which_interrupt: 0,
             // timer?
@@ -103,7 +103,17 @@ pub fn start(state: State8080) {
                     handle_out(&mut machine, port_number, value);
                     machine.state.increment_program_counter(2);
                 },
-                _ => cycle_count += emulator::emulate_8080_op(&mut machine.state),
+                _ => {
+                    cycle_count += emulator::emulate_8080_op(&mut machine.state);
+                    let current_time = Instant::now();
+                    let time_since_last_interrupt = current_time.saturating_duration_since(machine.last_timer);
+                    if time_since_last_interrupt.as_secs_f64() > 1.0/60.0 {
+                        if machine.state.interrupt_enabled() {
+                            machine.state.generate_interrupt(2);
+                            machine.last_timer = current_time;
+                        }
+                    }
+                }
             }
 
         }

@@ -36,12 +36,25 @@ impl State8080 {
         self.pc += delta;
     }
 
+    pub fn interrupt_enabled(&self) -> bool {
+        self.int_enable != 0
+    }
+
     pub fn enable_interrupt(&mut self) {
         self.int_enable = 1;
     }
 
     pub fn disable_interrupt(&mut self) {
         self.int_enable = 0;
+    }
+
+    pub fn generate_interrupt(&mut self, interrupt_num: u16) {
+        let high = ((self.pc & 0xff00) >> 8) as u8;
+        let low = (self.pc & 0xff) as u8;
+        self.memory[self.sp as usize - 1] = high;
+        self.memory[self.sp as usize - 2] = low;
+        self.sp -= 2;
+        self.pc = 8 * interrupt_num;
     }
 
     pub fn empty_state() -> State8080 {
