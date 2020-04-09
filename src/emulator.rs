@@ -47,8 +47,17 @@ const CYCLES: [u32; 256] = [
 pub fn emulate_8080_op(state: &mut State8080) -> u32 {
     let program_counter: usize = state.program_counter() as usize;
     let opcode: u8 = state.memory[program_counter];
-    let (opcode_description, _) = disassembler::disassemble_opcode(&state.memory, program_counter);
-    println!("{}\t| {:#02x} | {:x?}", opcode_description, opcode, state);
+    // TODO: How expensive is the following env var fetch and check? Does it
+    // need to be moved outside this function?
+    if let Ok(val) = std::env::var("DEBUG_PRINT_INSTRUCTIONS") {
+        match val.as_ref() {
+            "1" => {
+                let (opcode_description, _) = disassembler::disassemble_opcode(&state.memory, program_counter);
+                println!("{}\t| {:#02x} | {:x?}", opcode_description, opcode, state);
+            },
+            _ => {},
+        }
+    }
 
     state.increment_program_counter(1);
 
