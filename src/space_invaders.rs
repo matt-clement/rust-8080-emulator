@@ -120,6 +120,7 @@ pub fn start(state: State8080) {
 
 fn handle_in(machine: &mut SpaceInvadersMachine, port: u8) {
     match port {
+        1 => machine.state.a = machine.in_port1,
         3 => {
             let value: u16 = ((machine.shift_high as u16) << 8) | machine.shift_low as u16;
             let masked_value: u8 = ((value >> (8 - machine.shift_offset)) & 0xff) as u8;
