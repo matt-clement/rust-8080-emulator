@@ -97,7 +97,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.cy = if (state.a & 0x80) == 0x80 { 1 } else { 0 };
             state.a = state.a.rotate_left(1);
         },
-        0x08 => unimplemented_instruction(state),
+        0x08 => {},
         0x09 => {
             let bc: u16 = ((state.b as u16) << 8) | state.c as u16;
             let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
