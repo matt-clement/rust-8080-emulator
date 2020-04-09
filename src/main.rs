@@ -25,12 +25,6 @@ fn run_space_invaders(bin_file_name: &str) {
     let mut file = File::open(&bin_file_name).expect(&format!("Unable to open file '{}'", bin_file_name));
     let mut buffer: Vec<u8> = Vec::new();
     let _ = file.read_to_end(&mut buffer);
-    let mut pc = 0x000;
-    while pc < buffer.len() {
-        let (text, inc) = disassembler::disassemble_opcode(&buffer, pc);
-        println!("{}", text);
-        pc += inc;
-    }
     while buffer.len() < 0x10000 {
         buffer.push(0);
     }
