@@ -221,7 +221,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.h = state.memory[program_counter + 2];
             state.increment_program_counter(2);
         },
-        0x22 => unimplemented_instruction(state),
+        0x22 => {
+            let high_address = (state.memory[program_counter + 2] as u16) << 8;
+            let low_address = state.memory[program_counter + 1] as u16;
+            let address: usize = (high_address | low_address) as usize;
+            state.memory[address] = state.l;
+            state.memory[address + 1] = state.h;
+            state.increment_program_counter(2);
+        },
         0x23 => {
             let result = (((state.h as u16) << 8) | state.l as u16) + 1;
             state.h = ((result & 0xff00) >> 8) as u8;
@@ -2146,5 +2153,18 @@ mod test {
         assert_eq!(state.a, 0x01);
         assert_eq!(state.cc.cy, 1);
         assert_eq!(state.cc.ac, 1);
+    }
+
+    #[test]
+    fn test_shld() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x22, 0x03, 0x00, 0x00, 0x00];
+        state.h = 0xae;
+        state.l = 0x29;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x03], 0x29);
+        assert_eq!(state.memory[0x04], 0xae);
+        assert_eq!(state.program_counter(), 3);
     }
 }
