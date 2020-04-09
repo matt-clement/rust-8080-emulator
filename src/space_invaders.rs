@@ -74,6 +74,8 @@ pub fn start(state: State8080) {
                 Event::KeyDown { keycode: Some(Keycode::Escape), ..} => {
                     break 'running
                 },
+                Event::KeyDown { keycode: Some(key), .. } => machine_key_down(&mut machine, &key),
+                Event::KeyUp { keycode: Some(key), .. } => machine_key_up(&mut machine, &key),
                 _ => {}
             }
         }
@@ -185,4 +187,40 @@ fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
     }).unwrap();
     canvas.copy_ex(&tex1, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
     canvas.copy_ex(&tex2, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
+}
+
+fn machine_key_down(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
+    match key {
+        Keycode::Left => {
+            machine.in_port1 |= 0x20;
+        },
+        Keycode::Right => {
+            machine.in_port1 |= 0x40;
+        },
+        Keycode::Z => {
+            machine.in_port1 |= 0x10;
+        },
+        Keycode::T => {
+            machine.in_port1 |= 0x04;
+        },
+        _ => {},
+    }
+}
+
+fn machine_key_up(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
+    match key {
+        Keycode::Left => {
+            machine.in_port1 &= 0x20;
+        },
+        Keycode::Right => {
+            machine.in_port1 &= 0x40;
+        },
+        Keycode::Z => {
+            machine.in_port1 &= 0x10;
+        },
+        Keycode::T => {
+            machine.in_port1 &= 0x04;
+        },
+        _ => {},
+    }
 }
