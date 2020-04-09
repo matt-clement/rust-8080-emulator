@@ -237,7 +237,20 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.h = state.memory[program_counter + 1];
             state.increment_program_counter(1);
         },
-        0x27 => unimplemented_instruction(state),
+        0x27 => {
+            let low: u8 = state.a & 0xf;
+            if low > 9 || state.cc.ac != 0 {
+                let result = low + 0x06;
+                state.cc.ac = if result > 0xf { 1 } else { 0 };
+                state.a = state.a.wrapping_add(0x06);
+            }
+            let high: u8 = (state.a & 0xf0) >> 4;
+            if high > 9 || state.cc.cy != 0 {
+                let result = high + 0x06;
+                state.cc.cy = if result > 0xf { 1 } else { 0 };
+                state.a = state.a.wrapping_add(0x60);
+            }
+        },
         0x28 => unimplemented_instruction(state),
         0x29 => {
             let hl: u16 = ((state.h as u16) << 8) | state.l as u16;
@@ -2104,5 +2117,19 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xb5);
         assert_eq!(state.cc.cy, 0);
+    }
+
+    #[test]
+    fn test_daa() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x27];
+        state.a = 0x9b;
+        state.cc.cy = 0;
+        state.cc.ac = 0;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x01);
+        assert_eq!(state.cc.cy, 1);
+        assert_eq!(state.cc.ac, 1);
     }
 }
