@@ -65,8 +65,6 @@ pub fn start(state: State8080) {
     let mut i = 0;
     'running: loop {
         i = (i + 1) % 255;
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} |
@@ -80,7 +78,6 @@ pub fn start(state: State8080) {
             }
         }
         draw(&machine.state, &mut canvas);
-        canvas.present();
         // Display is 60Hz, clock is 2MHz, this is close enough for now I guess
         let mut cycle_count = 0;
         while cycle_count < CYCLES_PER_FRAME {
@@ -197,6 +194,7 @@ fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
     }).unwrap();
     canvas.copy_ex(&tex1, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
     canvas.copy_ex(&tex2, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
+    canvas.present();
 }
 
 fn machine_key_down(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
