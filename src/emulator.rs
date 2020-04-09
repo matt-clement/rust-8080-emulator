@@ -10,8 +10,13 @@ fn parity(x: u8) -> u8 {
     if (p & 0x01) == 1 { 0 } else { 1 }
 }
 
-fn unimplemented_instruction(_state: &State8080) -> ! {
-    eprintln!("Error: Unimplimented instruction");
+fn unimplemented_instruction(state: &State8080) -> ! {
+    // Subtracting one from the program counter is a workaround because we
+    // increment it at the start of the `emulate_8080_op` function.
+    let actual_pc = state.program_counter() as usize - 1;
+    let (opcode_description, _) = disassembler::disassemble_opcode(&state.memory, actual_pc);
+    let opcode = state.memory[actual_pc];
+    eprintln!("Error: Unimplimented instruction: {} ({:02x})", opcode_description, opcode);
     std::process::exit(1);
 }
 
