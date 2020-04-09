@@ -199,6 +199,9 @@ fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
 
 fn machine_key_down(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
     match key {
+        Keycode::C => {
+            machine.in_port1 |= 0x01;
+        },
         Keycode::Left => {
             machine.in_port1 |= 0x20;
         },
@@ -217,6 +220,9 @@ fn machine_key_down(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Ke
 
 fn machine_key_up(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
     match key {
+        Keycode::C => {
+            machine.in_port1 &= 0x01;
+        },
         Keycode::Left => {
             machine.in_port1 &= 0x20;
         },
