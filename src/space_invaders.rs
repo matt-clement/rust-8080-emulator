@@ -221,19 +221,19 @@ fn machine_key_down(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Ke
 fn machine_key_up(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
     match key {
         Keycode::C => {
-            machine.in_port1 &= 0x01;
+            machine.in_port1 &= !0x01;
         },
         Keycode::Left => {
-            machine.in_port1 &= 0x20;
+            machine.in_port1 &= !0x20;
         },
         Keycode::Right => {
-            machine.in_port1 &= 0x40;
+            machine.in_port1 &= !0x40;
         },
         Keycode::Z => {
-            machine.in_port1 &= 0x10;
+            machine.in_port1 &= !0x10;
         },
         Keycode::T => {
-            machine.in_port1 &= 0x04;
+            machine.in_port1 &= !0x04;
         },
         _ => {},
     }
