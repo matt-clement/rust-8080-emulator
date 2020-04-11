@@ -1,0 +1,59 @@
+ABOUT
+----------
+
+This is an early version of an emulator for the Intel 8080 CPU. The purpose of this repository is for me learn about the 8080 CPU, emulation, and assembly language. It is not complete and does not work very well at the moment. A number of instructions are unimplimented and I'm sure there are bugs in others.
+
+Initially, the code was heavily based on a tutorial located at emulator101.com. That tutorial is an excellent resource and was a huge help with starting out.
+
+
+BUILDING
+----------
+
+Make sure you have the Rust compiler and `cargo` installed before attempting to build the project (https://www.rust-lang.org/). Precompiled binaries are not available.
+    1. `$ git clone https://github.com/matt-clement/rust-8080-emulator`
+    2. `$ cd rust-8080-emulator`
+    3. `$ cargo build --release`
+    4. `$ ./target/release/rust-8080-emulator foo ./path/to/8080/binary` (see Usage for more details)
+
+
+USAGE
+----------
+
+`rust-8080-emulator` takes two arguments.
+
+The first is the machine to emulate. There are two options currently supported: "space-invaders" and "diag". This sets up the environment around the CPU (e.g. memory, I/O, etc.). Use "space-invaders" to set up an environment similar to an arcade cabinet that would have originally run the code, with inputs and a display. Use "diag" to set up the environment for the Microcosm Associates 8080/8085 CPU Diagnostic.
+
+The second argument is the path to the machine code that you want to run.
+
+For example, if you had the 8080/8085 CPU Diagnostic binary at "/path/to/diagnostic", you could run the following command:
+`$ ./target/release/rust-8080-emulator diag /path/to/diagnostic`
+
+And if you have the space invaders machine code at "/path/to/invaders", you could run the following command:
+`$ ./target/release/rust-8080-emulator space-invaders /path/to/invaders`
+
+Machine code for the above two programs is not included in this repository.
+
+
+TESTS
+----------
+
+This project has unit tests around many of the instructions. You can run them by running `$ cargo test`
+
+
+TODO
+----------
+
+ * Create an interface to interact with CPU instead of manipulating fields on the CPU state struct directly. This will hopefully reduce a lot of duplication in the implementation of the instructions.
+ * Possibly break out instruction handlers into smaller files instead of having all of them in a 2000 line file.
+ * Create some integration tests
+ * Get space invaders running. I can boot it up and insert coins, but when I try to start a game it seems to reset back to the main screen
+ * Sound for space invaders
+ * Research programs other than space invaders to run.
+ * Think about improving the debugging experience - good logs, possible breakpoints or pause/step/continue execution. Maybe a visual represenation of the CPU state could be helpful with a log of the current and most recent ~5 instructions?
+ * Assembler
+
+
+CONTRIBUTING
+----------
+
+This is a personal project created for the purpose of learning about the 8080 CPU, emulation, and assembly through hands-on work. I am happy to hear feedback about this project and respond to questions or comments, however I do not expect to merge any pull requests at this time.
