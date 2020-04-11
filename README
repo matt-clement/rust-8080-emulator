@@ -10,6 +10,7 @@ BUILDING
 ----------
 
 Make sure you have the Rust compiler and `cargo` installed before attempting to build the project (https://www.rust-lang.org/). Precompiled binaries are not available.
+Also make sure you have SDL2 development libraries installed. This is most likely available from your package manager.
     1. `$ git clone https://github.com/matt-clement/rust-8080-emulator`
     2. `$ cd rust-8080-emulator`
     3. `$ cargo build --release`
