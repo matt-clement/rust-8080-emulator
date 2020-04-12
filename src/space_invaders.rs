@@ -6,7 +6,6 @@ use std::time::{Duration, Instant};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::rect::{Rect,Point};
 use sdl2::render::Canvas;
 
 // Display is 60Hz, clock is 2MHz
@@ -143,23 +142,41 @@ fn handle_out(machine: &mut SpaceInvadersMachine, port: u8, value: u8) {
     }
 }
 
+enum PixelColor {
+    BLACK = 0b00000000,
+    RED = 0b11100000,
+    GREEN = 0b00011100,
+    WHITE = 0b11111111,
+}
+
 fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
     let texture_creator = canvas.texture_creator();
-    let mut texture = texture_creator.create_texture_target(PixelFormatEnum::RGB332, 256, 224).unwrap();
-    let vram: &[u8] = &state.memory[0x2400..0x3fff];
-    let pixels: Vec<u8> = vram.iter().flat_map(|&dat| {
-        (0..0x8).into_iter().map(move |shift| {
-            let bit = (dat & (1 << shift)) >> shift;
-            match bit {
-                0 => 0x00,
-                1 => 0xff,
-                _ => 0xe0,
-            }
+    let mut texture = texture_creator.create_texture_target(PixelFormatEnum::RGB332, 224, 256).unwrap();
+    let vram: &[u8] = &state.memory[0x2400..0x4000];
+    let pixels: &mut [u8] = &mut [0; 224 * 256];
+    for i in 0..(224 * 256 / 8) {
+        let memory_x = i % 32;
+        let memory_y = i / 32;
+        let current_byte = vram[i];
+        let screen_x = memory_y;
+        let screen_y_base = 255 - memory_x * 8;
+        (0..0x8).into_iter().for_each(|shift| {
+            let screen_y = screen_y_base - shift;
+            let bit = (current_byte & (1 << shift)) >> shift;
+            // TODO: Different screen regions have different colors
+            let expanded_pixel_data = match bit {
+                0 => PixelColor::BLACK,
+                1 => PixelColor::WHITE,
+                _ => PixelColor::RED,
+            };
+            let pixel_index = (screen_x + screen_y * 224) as usize;
+            pixels[pixel_index] = expanded_pixel_data as u8;
         })
-    }).collect();
-    texture.update(None, &pixels, 256).unwrap();
+    }
 
-    canvas.copy_ex(&texture, Rect::new(0, 0, 256, 224), Rect::new(0, 0, 256, 224), 270.0, Point::new(128, 128), false, false).unwrap();
+    texture.update(None, &pixels, 224).unwrap();
+
+    canvas.copy(&texture, None, None).unwrap();
     canvas.present();
 }
 
