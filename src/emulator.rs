@@ -54,6 +54,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
     let opcode: u8 = state.memory[program_counter];
     // TODO: How expensive is the following env var fetch and check? Does it
     // need to be moved outside this function?
+    /*
     if let Ok(val) = std::env::var("DEBUG_PRINT_INSTRUCTIONS") {
         match val.as_ref() {
             "1" => {
@@ -63,6 +64,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             _ => {},
         }
     }
+    */
 
     state.increment_program_counter(1);
 
