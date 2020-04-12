@@ -36,6 +36,33 @@ impl State8080 {
         self.pc += delta;
     }
 
+    pub fn bc(&self) -> u16 {
+        ((self.b as u16) << 8) | self.c as u16
+    }
+
+    pub fn set_bc(&mut self, result: u16) {
+        self.b = ((result & 0xff00) >> 8) as u8;
+        self.c = (result & 0x00ff) as u8;
+    }
+
+    pub fn de(&self) -> u16 {
+        ((self.d as u16) << 8) | self.e as u16
+    }
+
+    pub fn set_de(&mut self, result: u16) {
+        self.d = ((result & 0xff00) >> 8) as u8;
+        self.e = (result & 0x00ff) as u8;
+    }
+
+    pub fn hl(&self) -> u16 {
+        ((self.h as u16) << 8) | self.l as u16
+    }
+
+    pub fn set_hl(&mut self, result: u16) {
+        self.h = ((result & 0xff00) >> 8) as u8;
+        self.l = (result & 0x00ff) as u8;
+    }
+
     pub fn interrupt_enabled(&self) -> bool {
         self.int_enable != 0
     }
