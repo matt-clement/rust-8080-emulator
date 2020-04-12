@@ -5,8 +5,8 @@ use std::time::{Duration, Instant};
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
-use sdl2::rect::Point;
+use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::rect::{Rect,Point};
 use sdl2::render::Canvas;
 
 // Display is 60Hz, clock is 2MHz
@@ -145,35 +145,23 @@ fn handle_out(machine: &mut SpaceInvadersMachine, port: u8, value: u8) {
 
 fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
     let texture_creator = canvas.texture_creator();
-    let mut texture = texture_creator.create_texture_target(None, 224, 256).unwrap();
+    let mut texture = texture_creator.create_texture_target(PixelFormatEnum::RGB332, 256, 224).unwrap();
     let vram: &[u8] = &state.memory[0x2400..0x3fff];
-    canvas.with_texture_canvas(&mut texture, |texture_canvas| {
-        let on_color = Color::RGB(0xff, 0xff, 0xff);
-        let off_color = Color::RGB(0, 0, 0);
-        let error_color = Color::RGB(0xff, 0, 0);
-        texture_canvas.set_draw_color(off_color);
-        texture_canvas.clear();
-        vram.iter().enumerate().for_each(|(index, value)| {
-            let bit_number = index * 8;
-            (0..0x8).into_iter().for_each(|shift| {
-                let pixel_number = bit_number + shift;
-                let bit = (value & (1 << shift)) >> shift;
-                let row = pixel_number / 256;
-                let column = pixel_number % 256;
-                let pixel_color = match bit {
-                    0 => off_color,
-                    1 => on_color,
-                    _ => error_color,
-                };
-                texture_canvas.set_draw_color(pixel_color);
-                texture_canvas.draw_point(Point::new(row as i32, column as i32)).unwrap();
-            });
-        });
-    }).unwrap();
-    canvas.copy_ex(&texture, None, None, 0.0, Point::new(0, 0), false, true).unwrap();
+    let pixels: Vec<u8> = vram.iter().flat_map(|&dat| {
+        (0..0x8).into_iter().map(move |shift| {
+            let bit = (dat & (1 << shift)) >> shift;
+            match bit {
+                0 => 0x00,
+                1 => 0xff,
+                _ => 0xe0,
+            }
+        })
+    }).collect();
+    texture.update(None, &pixels, 256).unwrap();
+
+    canvas.copy_ex(&texture, Rect::new(0, 0, 256, 224), Rect::new(0, 0, 256, 224), 270.0, Point::new(128, 128), false, false).unwrap();
     canvas.present();
 }
-
 
 fn machine_key_down(machine: &mut SpaceInvadersMachine, key: &sdl2::keyboard::Keycode) {
     match key {
