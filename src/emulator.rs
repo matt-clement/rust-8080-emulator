@@ -87,7 +87,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.b = masked_answer;
         },
         0x05 => {
             let answer: u8 = state.b.wrapping_sub(1);
@@ -128,7 +128,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.c = masked_answer;
         },
         0x0d => {
             let answer: u8 = state.c.wrapping_sub(1);
@@ -164,7 +164,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.d = masked_answer;
         },
         0x15 => {
             let answer: u8 = state.d.wrapping_sub(1);
@@ -207,7 +207,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.e = masked_answer;
         },
         0x1d => {
             let answer: u8 = state.e.wrapping_sub(1);
@@ -306,7 +306,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.l = masked_answer;
         },
         0x2d => {
             let answer: u8 = state.l.wrapping_sub(1);
@@ -336,13 +336,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.sp += 1;
         },
         0x34 => {
-            let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
-            let answer: u16 = state.memory[offset as usize] as u16 + 1;
+            let address: u16 = ((state.h as u16) << 8 ) | state.l as u16;
+            let answer: u16 = state.memory[address as usize] as u16 + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.memory[address as usize] = masked_answer;
         },
         0x35 => {
             let offset: u16 = ((state.h as u16) << 8 ) | state.l as u16;
@@ -385,7 +385,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            state.a = masked_answer;
         },
         0x3d => {
             let answer: u8 = state.a.wrapping_sub(1);
@@ -2210,5 +2210,23 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x6a);
         assert_eq!(state.cc.cy, 1);
+    }
+
+    #[test]
+    fn test_inr() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x0c];
+        state.c = 0x99;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.c, 0x9a);
+    }
+
+    #[test]
+    fn test_inr_mem() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x34, 0x99];
+        state.set_hl(0x01);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x01], 0x9a);
     }
 }
