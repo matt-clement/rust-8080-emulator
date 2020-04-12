@@ -2164,6 +2164,25 @@ mod test {
     }
 
     #[test]
+    fn test_lhld_high() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0; 0x2ff];
+        state.memory[0x00] = 0x2a;
+        state.memory[0x01] = 0xab;
+        state.memory[0x02] = 0x02;
+        state.memory[0x2ab] = 0xff;
+        state.memory[0x2ac] = 0x03;
+
+        state.l = 0x00;
+        state.h = 0x00;
+
+        emulate_8080_op(&mut state);
+        assert_eq!(state.l, 0xff);
+        assert_eq!(state.h, 0x03);
+        assert_eq!(state.program_counter(), 3);
+    }
+
+    #[test]
     fn test_ral() {
         let mut state = State8080::empty_state();
         state.memory = vec![0x17];
