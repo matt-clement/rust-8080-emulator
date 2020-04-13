@@ -75,7 +75,10 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.b = state.memory[program_counter + 2];
             state.increment_program_counter(2);
         },
-        0x02 => unimplemented_instruction(state),
+        0x02 => { // STAX B
+            let address = state.bc();
+            state.memory[address as usize] = state.a;
+        },
         0x03 => { // INX B
             state.set_bc(state.bc().wrapping_add(1));
         },
@@ -144,7 +147,10 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.d = state.memory[program_counter + 2];
             state.increment_program_counter(2);
         },
-        0x12 => unimplemented_instruction(state), // STAX D
+        0x12 => { // STAX D
+            let address = state.de();
+            state.memory[address as usize] = state.a;
+        },
         0x13 => { // INX D
             state.set_de(state.de().wrapping_add(1));
         }
@@ -2210,5 +2216,17 @@ mod test {
         state.set_hl(0x01);
         emulate_8080_op(&mut state);
         assert_eq!(state.memory[0x01], 0x9a);
+    }
+
+    #[test]
+    fn test_stax() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x00; 0x4000];
+        state.memory[0x00] = 0x02;
+        state.a = 0xde;
+        state.b = 0x3f;
+        state.c = 0x16;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.memory[0x3f16], 0xde);
     }
 }
