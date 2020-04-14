@@ -84,6 +84,14 @@ impl State8080 {
         self.pc = 8 * interrupt_num;
     }
 
+    pub fn read_memory(&self, address: usize) -> u8 {
+        self.memory[address]
+    }
+
+    pub fn write_memory(&mut self, address: usize, value: u8) {
+        self.memory[address] = value;
+    }
+
     pub fn empty_state() -> State8080 {
         State8080 {
             a: 0,
