@@ -995,9 +995,10 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xc1 => { // POP B
-            state.c = state.read_memory(state.sp as usize);
-            state.b = state.read_memory(state.sp as usize + 1);
-            state.sp += 2;
+            let (high, low) = state.pop();
+            state.b = high;
+            state.c = low;
+
         },
         0xc2 => { // JNZ adr
             if state.cc.z == 0 {
@@ -1110,9 +1111,9 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xd1 => { // POP D
-            state.e = state.read_memory(state.sp as usize);
-            state.d = state.read_memory(state.sp as usize + 1);
-            state.sp += 2;
+            let (high, low) = state.pop();
+            state.d = high;
+            state.e = low;
         },
         0xd2 => { // JNC adr
             if state.cc.cy == 0 {
@@ -1216,9 +1217,9 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xe1 => { // POP H
-            state.l = state.read_memory(state.sp as usize);
-            state.h = state.read_memory(state.sp as usize + 1);
-            state.sp += 2;
+            let (high, low) = state.pop();
+            state.h = high;
+            state.l = low;
         },
         0xe2 => { // JPO adr
             if state.cc.p == 0 {
@@ -1327,14 +1328,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xf1 => { // POP PSW
-            state.a = state.read_memory(state.sp as usize + 1);
-            let psw: u8 = state.read_memory(state.sp as usize);
+            let (high, psw) = state.pop();
+            state.a = high;
             state.cc.cy = if 0x01 == (psw & 0x01) { 1 } else { 0 };
             state.cc.p = if 0x04 == (psw & 0x04) { 1 } else { 0 };
             state.cc.ac = if 0x10 == (psw & 0x10) { 1 } else { 0 };
             state.cc.z = if 0x40 == (psw & 0x40) { 1 } else { 0 };
             state.cc.s = if 0x80 == (psw & 0x80) { 1 } else { 0 };
-            state.sp += 2;
         },
         0xf2 => { // JP adr
             if state.cc.s == 0 {

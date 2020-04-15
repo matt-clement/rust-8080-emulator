@@ -98,6 +98,13 @@ impl State8080 {
         self.sp -= 2;
     }
 
+    pub fn pop(&mut self) -> (u8, u8) {
+        let low = self.read_memory(self.sp as usize);
+        let high = self.read_memory(self.sp as usize + 1);
+        self.sp += 2;
+        (high, low)
+    }
+
     pub fn empty_state() -> State8080 {
         State8080 {
             a: 0,
