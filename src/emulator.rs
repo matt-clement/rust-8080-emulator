@@ -303,7 +303,9 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.l = state.read_memory(program_counter + 1);
             state.increment_program_counter(1);
         },
-        0x2f => unimplemented_instruction(state), // CMA
+        0x2f => { // CMA
+            state.a = !state.a;
+        },
         0x30 => {}, // -
         0x31 => { // LXI SP, D16
             state.sp = ((state.read_memory(program_counter + 2) as u16) << 8) | state.read_memory(program_counter + 1) as u16;
@@ -2307,5 +2309,14 @@ mod test {
         assert_eq!(state.e, 0x05);
         assert_eq!(state.cc.cy, 0x00);
         assert_eq!(state.cc.z, 0x00);
+    }
+
+    #[test]
+    fn test_cma() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x2f];
+        state.a = 0x51;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xae);
     }
 }
