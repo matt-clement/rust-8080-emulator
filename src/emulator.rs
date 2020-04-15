@@ -1047,8 +1047,6 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
                 let low_address = (state.read_memory(state.sp as usize + 1) as u16) << 8;
                 state.set_program_counter(high_address | low_address);
                 state.sp += 2;
-            } else {
-                state.increment_program_counter(2);
             }
         },
         0xc9 => { // RET
