@@ -92,6 +92,12 @@ impl State8080 {
         self.memory[address] = value;
     }
 
+    pub fn push(&mut self, high: u8, low: u8) {
+        self.write_memory(self.sp as usize - 1, high);
+        self.write_memory(self.sp as usize - 2, low);
+        self.sp -= 2;
+    }
+
     pub fn empty_state() -> State8080 {
         State8080 {
             a: 0,

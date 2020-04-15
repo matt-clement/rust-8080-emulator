@@ -1027,9 +1027,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xc5 => { // PUSH B
-            state.write_memory(state.sp as usize - 1, state.b);
-            state.write_memory(state.sp as usize - 2, state.c);
-            state.sp -= 2;
+            state.push(state.b, state.c);
         },
         0xc6 => { // ADI D8
             let answer: u16 = (state.a as u16) + (state.read_memory(program_counter + 1) as u16);
@@ -1144,9 +1142,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xd5 => { // PUSH D
-            state.write_memory(state.sp as usize - 1, state.d);
-            state.write_memory(state.sp as usize - 2, state.e);
-            state.sp -= 2;
+            state.push(state.d, state.e);
         },
         0xd6 => { // SUI D8
             let subtrahend: u8 = state.read_memory(program_counter + 1);
@@ -1255,9 +1251,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xe5 => { // PUSH H
-            state.write_memory(state.sp as usize - 1, state.h);
-            state.write_memory(state.sp as usize - 2, state.l);
-            state.sp -= 2;
+            state.push(state.h, state.l);
         },
         0xe6 => { // ANI D8
             let answer: u8 = state.a & state.read_memory(program_counter + 1);
@@ -1368,11 +1362,9 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             }
         },
         0xf5 => { // PUSH PSW
-            state.write_memory(state.sp as usize -1, state.a);
             let cc = &state.cc;
             let psw: u8 = cc.cy | cc.p << 2 | cc.ac << 4 | cc.z << 6 | cc.s << 7;
-            state.write_memory(state.sp as usize - 2, psw);
-            state.sp -= 2;
+            state.push(state.a, psw);
         },
         0xf6 => { // ORI D8
             let answer: u16 = (state.a as u16) | (state.read_memory(program_counter + 1) as u16);
