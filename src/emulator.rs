@@ -976,14 +976,63 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.p = parity(answer);
             state.a = answer;
         },
-        0xb8 => unimplemented_instruction(state), // CMP B
-        0xb9 => unimplemented_instruction(state), // CMP C
-        0xba => unimplemented_instruction(state), // CMP D
-        0xbb => unimplemented_instruction(state), // CMP E
-        0xbc => unimplemented_instruction(state), // CMP H
-        0xbd => unimplemented_instruction(state), // CMP L
-        0xbe => unimplemented_instruction(state), // CMP M
-        0xbf => unimplemented_instruction(state), // CMP A
+        0xb8 => { // CMP B
+            let answer = state.a.wrapping_sub(state.b);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.b > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xb9 => { // CMP C
+            let answer = state.a.wrapping_sub(state.c);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.c > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xba => { // CMP D
+            let answer = state.a.wrapping_sub(state.d);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.d > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xbb => { // CMP E
+            let answer = state.a.wrapping_sub(state.e);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.e > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xbc => { // CMP H
+            let answer = state.a.wrapping_sub(state.h);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.h > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xbd => { // CMP L
+            let answer = state.a.wrapping_sub(state.l);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.l > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xbe => { // CMP M
+            let value = state.read_memory(state.hl() as usize);
+            let answer = state.a.wrapping_sub(value);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if value > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
+        0xbf => { // CMP A
+            let answer = state.a.wrapping_sub(state.a);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.cy = if state.a > state.a { 1 } else { 0 };
+            state.cc.p = parity(answer);
+        },
         0xc0 => { // RNZ
             if state.cc.z != 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;
@@ -2211,5 +2260,50 @@ mod test {
         state.c = 0x16;
         emulate_8080_op(&mut state);
         assert_eq!(state.read_memory(0x3f16), 0xde);
+    }
+
+    #[test]
+    fn test_cmp() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xbb];
+        state.a = 0x0a;
+        state.e = 0x05;
+        state.cc.cy = 0x01;
+        state.cc.z = 0x01;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x0a);
+        assert_eq!(state.e, 0x05);
+        assert_eq!(state.cc.cy, 0x00);
+        assert_eq!(state.cc.z, 0x00);
+    }
+
+    #[test]
+    fn test_cmp_2() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xbb];
+        state.a = 0x02;
+        state.e = 0x05;
+        state.cc.cy = 0x00;
+        state.cc.z = 0x01;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0x02);
+        assert_eq!(state.e, 0x05);
+        assert_eq!(state.cc.cy, 0x01);
+        assert_eq!(state.cc.z, 0x00);
+    }
+
+    #[test]
+    fn test_cmp_3() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xbb];
+        state.a = 0xe5;
+        state.e = 0x05;
+        state.cc.cy = 0x01;
+        state.cc.z = 0x01;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.a, 0xe5);
+        assert_eq!(state.e, 0x05);
+        assert_eq!(state.cc.cy, 0x00);
+        assert_eq!(state.cc.z, 0x00);
     }
 }
