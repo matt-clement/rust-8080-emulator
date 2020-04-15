@@ -1089,7 +1089,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
-        0xc7 => unimplemented_instruction(state), // RST 0
+        0xc7 => { // RST 0
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x00);
+        },
         0xc8 => { // RZ
             if state.cc.z != 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;
@@ -1146,7 +1152,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
-        0xcf => unimplemented_instruction(state), // RST 1
+        0xcf => { // RST 1
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x08);
+        }
         0xd0 => { // RNC
             if state.cc.cy == 0 {
                 let low_address = state.read_memory(state.sp as usize) as u16;
@@ -1202,7 +1214,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = answer;
             state.increment_program_counter(1);
         },
-        0xd7 => unimplemented_instruction(state), // RST 2
+        0xd7 => { // RST 2
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x10);
+        },
         0xd8 => { // RC
             if state.cc.cy != 0 {
                 let low_address = state.read_memory(state.sp as usize) as u16;
@@ -1252,7 +1270,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = answer;
             state.increment_program_counter(1);
         }
-        0xdf => unimplemented_instruction(state), // RST 3
+        0xdf => { // RST 3
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x18);
+        }
         0xe0 => { // RPO
             if state.cc.p == 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;
@@ -1310,7 +1334,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = answer;
             state.increment_program_counter(1);
         },
-        0xe7 => unimplemented_instruction(state), // RST 4
+        0xe7 => { // RST 4
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x20);
+        }
         0xe8 => { // RPE
             if state.cc.p != 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;
@@ -1365,7 +1395,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
-        0xef => unimplemented_instruction(state), // RST 5
+        0xef => { // RST 5
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x28);
+        }
         0xf0 => { // RP
             if state.cc.s == 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;
@@ -1495,7 +1531,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             };
             state.increment_program_counter(1);
         },
-        0xff => unimplemented_instruction(state), // RST 7
+        0xff => { // RST 7
+            let ret: u16 = state.program_counter() + 2;
+            state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
+            state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
+            state.sp -= 2;
+            state.set_program_counter(0x38);
+        },
     }
     CYCLES[opcode as usize]
 }
