@@ -1358,7 +1358,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
                 let low_address = state.read_memory(program_counter + 1) as u16;
                 state.set_program_counter(high_address | low_address);
             } else {
-                state.set_program_counter(2);
+                state.increment_program_counter(2);
             }
         },
         0xf5 => { // PUSH PSW
