@@ -1367,13 +1367,12 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.push(state.a, psw);
         },
         0xf6 => { // ORI D8
-            let answer: u16 = (state.a as u16) | (state.read_memory(program_counter + 1) as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            let answer: u8 = state.a | state.read_memory(program_counter + 1);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = 0;
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
+            state.cc.p = parity(answer);
+            state.a = answer;
             state.increment_program_counter(1);
         },
         0xf7 => { // RST 6
