@@ -1519,16 +1519,12 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
 
             // The following aligns with implementations I've seen
             // I still have to convince myself that it's right.
-            let answer: u8 = state.a.wrapping_sub(state.read_memory(program_counter + 1));
-            let masked_answer: u8 = answer & 0xff;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
+            let immediate_data = state.read_memory(program_counter + 1);
+            let answer: u8 = state.a.wrapping_sub(immediate_data);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.cc.cy = if state.a < state.read_memory(program_counter + 1) {
-                1
-            } else {
-                0
-            };
+            state.cc.p = parity(answer);
+            state.cc.cy = if state.a < immediate_data { 1 } else { 0 };
             state.increment_program_counter(1);
         },
         0xff => { // RST 7
