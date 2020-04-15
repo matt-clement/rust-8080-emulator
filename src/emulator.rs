@@ -1319,7 +1319,9 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
                 state.increment_program_counter(2);
             }
         },
-        0xe9 => unimplemented_instruction(state), // PCHL
+        0xe9 => { // PCHL
+            state.set_program_counter(state.hl());
+        },
         0xea => { // JPE adr
             if state.cc.p != 0 {
                 let high_address = (state.read_memory(program_counter + 2) as u16) << 8;
