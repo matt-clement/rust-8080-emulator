@@ -60,6 +60,7 @@ pub fn start(state: State8080) {
     canvas.set_draw_color(Color::RGB(10, 10, 10));
     canvas.clear();
     canvas.present();
+    let mut color_scheme = ColorScheme::CLASSIC;
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut i = 0;
     'running: loop {
@@ -71,12 +72,18 @@ pub fn start(state: State8080) {
                 Event::KeyDown { keycode: Some(Keycode::Escape), ..} => {
                     break 'running
                 },
+                Event::KeyDown { keycode: Some(Keycode::O), .. } => {
+                    color_scheme = match color_scheme {
+                        ColorScheme::MONOCHROME => ColorScheme::CLASSIC,
+                        ColorScheme::CLASSIC => ColorScheme::MONOCHROME,
+                    };
+                },
                 Event::KeyDown { keycode: Some(key), .. } => machine_key_down(&mut machine, &key),
                 Event::KeyUp { keycode: Some(key), .. } => machine_key_up(&mut machine, &key),
                 _ => {}
             }
         }
-        draw(&machine.state, &mut canvas);
+        draw(&machine.state, &mut canvas, color_scheme);
         canvas.present();
         // Display is 60Hz, clock is 2MHz, this is close enough for now I guess
         let mut cycle_count = 0;
@@ -143,6 +150,34 @@ fn handle_out(machine: &mut SpaceInvadersMachine, port: u8, value: u8) {
     }
 }
 
+#[derive(Clone,Copy)]
+enum ColorScheme {
+    CLASSIC,
+    MONOCHROME,
+}
+
+impl ColorScheme {
+    fn get_pixel_color(&self, x: u8, y: u8, state: u8) -> PixelColor {
+        if state == 0 { return PixelColor::BLACK }
+        match self {
+            ColorScheme::MONOCHROME => PixelColor::WHITE,
+            ColorScheme::CLASSIC => {
+                if y >= 32 && y < 64 {
+                    PixelColor::RED
+                } else if y < 184 {
+                    PixelColor::WHITE
+                } else if y < 240 {
+                    PixelColor::GREEN
+                } else if x < 16 || x > 134 {
+                    PixelColor::WHITE
+                } else {
+                    PixelColor::GREEN
+                }
+            }
+        }
+    }
+}
+
 enum PixelColor {
     BLACK = 0b00000000,
     RED = 0b11100000,
@@ -150,7 +185,7 @@ enum PixelColor {
     WHITE = 0b11111111,
 }
 
-fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
+fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>, color_scheme: ColorScheme) {
     let texture_creator = canvas.texture_creator();
     let mut texture = texture_creator.create_texture_target(PixelFormatEnum::RGB332, 224, 256).unwrap();
     let vram: &[u8] = &state.memory[0x2400..0x4000];
@@ -165,11 +200,7 @@ fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>) {
             let screen_y = screen_y_base - shift;
             let bit = (current_byte & (1 << shift)) >> shift;
             // TODO: Different screen regions have different colors
-            let expanded_pixel_data = match bit {
-                0 => PixelColor::BLACK,
-                1 => PixelColor::WHITE,
-                _ => PixelColor::RED,
-            };
+            let expanded_pixel_data = color_scheme.get_pixel_color(screen_x as u8, screen_y as u8, bit);
             let pixel_index = (screen_x + screen_y * 224) as usize;
             pixels[pixel_index] = expanded_pixel_data as u8;
         })
