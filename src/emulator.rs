@@ -1,14 +1,6 @@
 use crate::state_8080::State8080;
 use crate::disassembler;
-
-// Returns 1 for even parity, 0 for odd
-fn parity(x: u8) -> u8 {
-    let mut p: u8 = x ^ x.checked_shr(1).unwrap_or(0);
-    p ^= p.checked_shr(2).unwrap_or(0);
-    p ^= p.checked_shr(4).unwrap_or(0);
-    p ^= p.checked_shr(8).unwrap_or(0);
-    if (p & 0x01) == 1 { 0 } else { 1 }
-}
+use crate::parity::parity;
 
 fn unimplemented_instruction(state: &State8080) -> ! {
     // Subtracting one from the program counter is a workaround because we
@@ -961,23 +953,6 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.cc.z, 1);
         assert_eq!(state.cc.p, 1);
-    }
-
-    #[test]
-    fn test_parity() {
-        assert_eq!(parity(0), 1);
-        assert_eq!(parity(1), 0);
-        assert_eq!(parity(2), 0);
-        assert_eq!(parity(3), 1);
-        assert_eq!(parity(4), 0);
-        assert_eq!(parity(5), 1);
-        assert_eq!(parity(8), 0);
-        assert_eq!(parity(16), 0);
-        assert_eq!(parity(127), 0);
-        assert_eq!(parity(128), 0);
-        assert_eq!(parity(129), 1);
-        assert_eq!(parity(254), 0);
-        assert_eq!(parity(255), 1);
     }
 
     #[test]

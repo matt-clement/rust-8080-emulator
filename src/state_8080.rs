@@ -1,3 +1,5 @@
+use crate::parity::parity;
+
 #[derive(Debug)]
 pub struct ConditionCodes {
     pub z: u8,
@@ -241,13 +243,4 @@ impl std::fmt::Debug for State8080 {
             .field("cc", &self.cc)
             .finish()
     }
-}
-
-// Returns 1 for even parity, 0 for odd
-fn parity(x: u8) -> u8 {
-    let mut p: u8 = x ^ x.checked_shr(1).unwrap_or(0);
-    p ^= p.checked_shr(2).unwrap_or(0);
-    p ^= p.checked_shr(4).unwrap_or(0);
-    p ^= p.checked_shr(8).unwrap_or(0);
-    if (p & 0x01) == 1 { 0 } else { 1 }
 }
