@@ -83,6 +83,25 @@ impl State8080 {
         self.a = masked_answer;
     }
 
+    pub fn sub(&mut self, value: u8) {
+        let answer: u8 = self.a.wrapping_sub(value);
+        self.cc.z = if answer == 0 { 1 } else { 0 };
+        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.cy = if self.a < value { 1 } else { 0 };
+        self.cc.p = parity(answer);
+        self.a = answer;
+    }
+
+    pub fn subb(&mut self, value: u8) {
+        let subtrahend: u8 = value + self.cc.cy;
+        let answer: u8 = self.a.wrapping_sub(subtrahend);
+        self.cc.z = if answer == 0 { 1 } else { 0 };
+        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.cy = if self.a < subtrahend { 1 } else { 0 };
+        self.cc.p = parity(answer);
+        self.a = answer;
+    }
+
     // I'm not sure how to implement this as a method on the state object and
     // also use it for multiple registers without resorting to something that
     // would add a lot of complexity (interior mutability? enum of all

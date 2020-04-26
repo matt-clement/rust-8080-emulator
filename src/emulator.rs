@@ -438,143 +438,22 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x8d => { state.addc(state.l); }, // ADC L
         0x8e => { state.addc(state.read_memory(state.hl() as usize)); }, // ADC M
         0x8f => { state.addc(state.a); }, // ADC A
-        0x90 => { // SUB B
-            let answer: u8 = state.a.wrapping_sub(state.b);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.b { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x91 => { // SUB C
-            let answer: u8 = state.a.wrapping_sub(state.c);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.c { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x92 => { // SUB D
-            let answer: u8 = state.a.wrapping_sub(state.d);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.d { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x93 => { // SUB E
-            let answer: u8 = state.a.wrapping_sub(state.e);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.e { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x94 => { // SUB H
-            let answer: u8 = state.a.wrapping_sub(state.h);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.h { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x95 => { // SUB L
-            let answer: u8 = state.a.wrapping_sub(state.l);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.l { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x96 => { // SUB M
-            let subtrahend: u8 = state.read_memory(state.hl() as usize);
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x97 => { // SUB A
-            let answer: u8 = state.a - state.a;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x98 => { // SBB B
-            let subtrahend: u8 = state.b + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x99 => { // SBB C
-            let subtrahend: u8 = state.c + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x9a => { // SBB D
-            let subtrahend: u8 = state.d + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x9b => { // SBB E
-            let subtrahend: u8 = state.e + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x9c => { // SBB H
-            let subtrahend: u8 = state.h + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x9d => { // SBB L
-            let subtrahend: u8 = state.l + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x9e => { // SBB M
-            let subtrahend: u8 = state.read_memory(state.hl() as usize) + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0x9f => { // SBB A
-            let subtrahend: u8 = state.a + state.cc.cy;
-            let answer: u8 = state.a.wrapping_sub(subtrahend);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
+        0x90 => { state.sub(state.b); }, // SUB B
+        0x91 => { state.sub(state.c); }, // SUB C
+        0x92 => { state.sub(state.d); }, // SUB D
+        0x93 => { state.sub(state.e); }, // SUB E
+        0x94 => { state.sub(state.h); }, // SUB H
+        0x95 => { state.sub(state.l); }, // SUB L
+        0x96 => { state.sub(state.read_memory(state.hl() as usize)); }, // SUB M
+        0x97 => { state.sub(state.a); }, // SUB A
+        0x98 => { state.subb(state.b); }, // SBB B
+        0x99 => { state.subb(state.c); }, // SBB C
+        0x9a => { state.subb(state.d); }, // SBB D
+        0x9b => { state.subb(state.e); }, // SBB E
+        0x9c => { state.subb(state.h); }, // SBB H
+        0x9d => { state.subb(state.l); }, // SBB L
+        0x9e => { state.subb(state.read_memory(state.hl() as usize)); }, // SBB M
+        0x9f => { state.subb(state.a); }, // SBB A
         0xa0 => { // ANA B
             let answer: u8 = state.a & state.b;
             state.cc.z = if answer == 0 { 1 } else { 0 };
