@@ -53,6 +53,9 @@ TODO
  * Think about improving the debugging experience - good logs, possible breakpoints or pause/step/continue execution. Maybe a visual represenation of the CPU state could be helpful with a log of the current and most recent ~5 instructions?
  * Assembler
  * Parity as lookup table?
+ * Methods on `State8080` to read/modify memory value at location of HL
+ * CPU Flag Enums
+ * Optimize instructions when the output is predetermined (e.g. XRA A)
 
 
 CONTRIBUTING
