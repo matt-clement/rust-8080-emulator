@@ -1,6 +1,6 @@
 use crate::state_8080::State8080;
 use crate::disassembler;
-use crate::parity::parity;
+use crate::parity::Parity;
 
 fn unimplemented_instruction(state: &State8080) -> ! {
     // Subtracting one from the program counter is a workaround because we
@@ -264,7 +264,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
+            state.cc.p = Parity::from(masked_answer);
             state.set_m(masked_answer);
         },
         0x35 => { // DCR M
@@ -272,7 +272,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let answer: u8 = minuend.wrapping_sub(1);
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
+            state.cc.p = Parity::from(answer);
             state.set_m(answer);
         },
         0x36 => { // MVI M, D8
@@ -490,7 +490,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
+            state.cc.p = Parity::from(masked_answer);
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
@@ -553,7 +553,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
+            state.cc.p = Parity::from(masked_answer);
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
@@ -615,7 +615,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
+            state.cc.p = Parity::from(answer);
             state.a = answer;
             state.increment_program_counter(1);
         },
@@ -671,7 +671,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
-            state.cc.p = parity(answer);
+            state.cc.p = Parity::from(answer);
             state.a = answer;
             state.increment_program_counter(1);
         }
@@ -683,7 +683,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_program_counter(0x18);
         }
         0xe0 => { // RPO
-            if state.cc.p == 0 {
+            if state.cc.p == Parity::Odd {
                 let high_address = state.read_memory(state.sp as usize) as u16;
                 let low_address = (state.read_memory(state.sp as usize + 1) as u16) << 8;
                 state.set_program_counter(high_address | low_address);
@@ -698,7 +698,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.l = low;
         },
         0xe2 => { // JPO adr
-            if state.cc.p == 0 {
+            if state.cc.p == Parity::Odd {
                 let high_address = (state.read_memory(program_counter + 2) as u16) << 8;
                 let low_address = state.read_memory(program_counter + 1) as u16;
                 state.set_program_counter(high_address | low_address);
@@ -715,7 +715,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.l = new_l;
         },
         0xe4 => { // CPO adr
-            if state.cc.p == 0 {
+            if state.cc.p == Parity::Odd {
                 let ret: u16 = program_counter as u16 + 2;
                 state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
                 state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
@@ -735,7 +735,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = 0;
-            state.cc.p = parity(answer);
+            state.cc.p = Parity::from(answer);
             state.a = answer;
             state.increment_program_counter(1);
         },
@@ -747,7 +747,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_program_counter(0x20);
         }
         0xe8 => { // RPE
-            if state.cc.p != 0 {
+            if state.cc.p == Parity::Even {
                 let high_address = state.read_memory(state.sp as usize) as u16;
                 let low_address = (state.read_memory(state.sp as usize + 1) as u16) << 8;
                 state.set_program_counter(high_address | low_address);
@@ -760,7 +760,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_program_counter(state.hl());
         },
         0xea => { // JPE adr
-            if state.cc.p != 0 {
+            if state.cc.p == Parity::Even {
                 let high_address = (state.read_memory(program_counter + 2) as u16) << 8;
                 let low_address = state.read_memory(program_counter + 1) as u16;
                 state.set_program_counter(high_address | low_address);
@@ -777,7 +777,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.l = new_l;
         },
         0xec => { // CPE adr
-            if state.cc.p != 0 {
+            if state.cc.p == Parity::Even {
                 let ret: u16 = program_counter as u16 + 2;
                 state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
                 state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
@@ -796,7 +796,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = 0;
-            state.cc.p = parity(masked_answer);
+            state.cc.p = Parity::from(masked_answer);
             state.a = masked_answer;
             state.increment_program_counter(1);
         },
@@ -819,7 +819,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let (high, psw) = state.pop();
             state.a = high;
             state.cc.cy = if 0x01 == (psw & 0x01) { 1 } else { 0 };
-            state.cc.p = if 0x04 == (psw & 0x04) { 1 } else { 0 };
+            state.cc.p = if 0x04 == (psw & 0x04) { Parity::Even } else { Parity::Odd };
             state.cc.ac = if 0x10 == (psw & 0x10) { 1 } else { 0 };
             state.cc.z = if 0x40 == (psw & 0x40) { 1 } else { 0 };
             state.cc.s = if 0x80 == (psw & 0x80) { 1 } else { 0 };
@@ -851,7 +851,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         },
         0xf5 => { // PUSH PSW
             let cc = &state.cc;
-            let psw: u8 = cc.cy | cc.p << 2 | cc.ac << 4 | cc.z << 6 | cc.s << 7;
+            let psw: u8 = cc.cy | Into::<u8>::into(cc.p) << 2 | cc.ac << 4 | cc.z << 6 | cc.s << 7;
             state.push(state.a, psw);
         },
         0xf6 => { // ORI D8
@@ -859,7 +859,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = 0;
-            state.cc.p = parity(answer);
+            state.cc.p = Parity::from(answer);
             state.a = answer;
             state.increment_program_counter(1);
         },
@@ -918,7 +918,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.cy = if answer > 0xff { carry_positive } else { carry_negative };
-            state.cc.p = parity(masked_answer);
+            state.cc.p = Parity::from(masked_answer);
             state.increment_program_counter(1);
             */
 
@@ -928,7 +928,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let answer: u8 = state.a.wrapping_sub(immediate_data);
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
+            state.cc.p = Parity::from(answer);
             state.cc.cy = if state.a < immediate_data { 1 } else { 0 };
             state.increment_program_counter(1);
         },
@@ -952,7 +952,7 @@ mod test {
         state.memory = vec![0x87];
         emulate_8080_op(&mut state);
         assert_eq!(state.cc.z, 1);
-        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.p, Parity::Even);
     }
 
     #[test]
@@ -1253,14 +1253,14 @@ mod test {
         state.sp = 0x01;
         state.a = 0x00;
         state.cc.cy = 0x00;
-        state.cc.p = 0x00;
+        state.cc.p = Parity::Odd;
         state.cc.ac = 0x00;
         state.cc.z = 0x00;
         state.cc.s = 0x00;
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xff);
         assert_eq!(state.cc.cy, 0x01);
-        assert_eq!(state.cc.p, 0x00);
+        assert_eq!(state.cc.p, Parity::Odd);
         assert_eq!(state.cc.ac, 0x00);
         assert_eq!(state.cc.z, 0x01);
         assert_eq!(state.cc.s, 0x01);
@@ -1274,7 +1274,7 @@ mod test {
         state.sp = 0x03;
         state.a = 0x47;
         state.cc.cy = 0x01;
-        state.cc.p = 0x01;
+        state.cc.p = Parity::Even;
         state.cc.ac = 0x00;
         state.cc.z = 0x01;
         state.cc.s = 0x00;
@@ -1291,7 +1291,7 @@ mod test {
         state.sp = 0x04;
         state.a = 0x47;
         state.cc.cy = 0x01;
-        state.cc.p = 0x01;
+        state.cc.p = Parity::Even;
         state.cc.ac = 0x00;
         state.cc.z = 0x01;
         state.cc.s = 0x00;
@@ -1304,7 +1304,7 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x47);
         assert_eq!(state.cc.cy, 0x01);
-        assert_eq!(state.cc.p, 0x01);
+        assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.ac, 0x00);
         assert_eq!(state.cc.z, 0x01);
         assert_eq!(state.cc.s, 0x00);
@@ -1360,7 +1360,7 @@ mod test {
         assert_eq!(state.a, 0x9a);
         assert_eq!(state.cc.z, 0);
         assert_eq!(state.cc.cy, 0);
-        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.s, 1);
         // TODO: assert_eq!(state.cc.ac, 1);
     }
@@ -1435,7 +1435,7 @@ mod test {
 
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x56);
-        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.cy, 0);
         // TODO: assert_eq!(state.cc.ac, 0);
         assert_eq!(state.cc.z, 0);
@@ -1443,7 +1443,7 @@ mod test {
 
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x14);
-        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.cy, 1);
         // TODO: assert_eq!(state.cc.ac, 1);
         assert_eq!(state.cc.z, 0);
@@ -1489,7 +1489,7 @@ mod test {
         assert_eq!(state.a, 0xff);
         assert_eq!(state.cc.cy, 1);
         assert_eq!(state.cc.s, 1);
-        assert_eq!(state.cc.p, 1);
+        assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.z, 0);
         // TODO: assert_eq!(state.cc.ac, 0);
     }
@@ -1505,7 +1505,7 @@ mod test {
         assert_eq!(state.a, 0xfe);
         assert_eq!(state.cc.cy, 1);
         assert_eq!(state.cc.s, 1);
-        assert_eq!(state.cc.p, 0);
+        assert_eq!(state.cc.p, Parity::Odd);
         assert_eq!(state.cc.z, 0);
         // TODO: assert_eq!(state.cc.ac, 0);
     }

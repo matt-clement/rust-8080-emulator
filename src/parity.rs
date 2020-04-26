@@ -1,5 +1,5 @@
-#[derive(Debug, PartialEq, Eq)]
-enum Parity {
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Parity {
     Even,
     Odd,
 }
@@ -25,7 +25,7 @@ impl From<Parity> for u8 {
     }
 }
 
-pub const fn parity(x: u8) -> u8 {
+const fn parity(x: u8) -> u8 {
     let mut p: u8 = x ^ x >> 1;
     p ^= p >> 2;
     p ^= p >> 4;
