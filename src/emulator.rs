@@ -462,70 +462,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xa5 => { state.ana(state.l); }, // ANA L
         0xa6 => { state.ana(state.read_memory(state.hl() as usize)); }, // ANA M
         0xa7 => { state.ana(state.a); }, // ANA A
-        0xa8 => { // XRA B
-            let answer: u8 = state.a ^ state.b;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa9 => { // XRA C
-            let answer: u8 = state.a ^ state.c;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xaa => { // XRA D
-            let answer: u8 = state.a ^ state.d;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xab => { // XRA E
-            let answer: u8 = state.a ^ state.e;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xac => { // XRA H
-            let answer: u8 = state.a ^ state.h;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xad => { // XRA L
-            let answer: u8 = state.a ^ state.l;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xae => { // XRA M
-            let answer: u8 = state.a ^ state.read_memory(state.hl() as usize);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xaf => { // XRA A
-            let answer: u8 = state.a ^ state.a;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
+        0xa8 => { state.xra(state.b); }, // XRA B
+        0xa9 => { state.xra(state.c); }, // XRA C
+        0xaa => { state.xra(state.d); }, // XRA D
+        0xab => { state.xra(state.e); }, // XRA E
+        0xac => { state.xra(state.h); }, // XRA H
+        0xad => { state.xra(state.l); }, // XRA L
+        0xae => { state.xra(state.read_memory(state.hl() as usize)); }, // XRA M
+        0xaf => { state.xra(state.a); }, // XRA A
         0xb0 => { // ORA B
             let answer: u8 = state.a | state.b;
             state.cc.z = if answer == 0 { 1 } else { 0 };
