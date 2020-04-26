@@ -25,12 +25,11 @@ impl From<Parity> for u8 {
     }
 }
 
-pub fn parity(x: u8) -> u8 {
-    let mut p: u8 = x ^ x.checked_shr(1).unwrap_or(0);
-    p ^= p.checked_shr(2).unwrap_or(0);
-    p ^= p.checked_shr(4).unwrap_or(0);
-    p ^= p.checked_shr(8).unwrap_or(0);
-    if (p & 0x01) == 1 { 0 } else { 1 }
+pub const fn parity(x: u8) -> u8 {
+    let mut p: u8 = x ^ x >> 1;
+    p ^= p >> 2;
+    p ^= p >> 4;
+    (p & 0x01) ^ 0x01
 }
 
 mod test {
