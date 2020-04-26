@@ -470,70 +470,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xad => { state.xra(state.l); }, // XRA L
         0xae => { state.xra(state.read_memory(state.hl() as usize)); }, // XRA M
         0xaf => { state.xra(state.a); }, // XRA A
-        0xb0 => { // ORA B
-            let answer: u8 = state.a | state.b;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb1 => { // ORA C
-            let answer: u8 = state.a | state.c;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb2 => { // ORA D
-            let answer: u8 = state.a | state.d;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb3 => { // ORA E
-            let answer: u8 = state.a | state.e;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb4 => { // ORA H
-            let answer: u8 = state.a | state.h;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb5 => { // ORA L
-            let answer: u8 = state.a | state.l;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb6 => { // ORA M
-            let answer: u8 = state.a | state.read_memory(state.hl() as usize);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xb7 => { // ORA A
-            let answer: u8 = state.a | state.a;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
+        0xb0 => { state.ora(state.b); }, // ORA B
+        0xb1 => { state.ora(state.c); }, // ORA C
+        0xb2 => { state.ora(state.d); }, // ORA D
+        0xb3 => { state.ora(state.e); }, // ORA E
+        0xb4 => { state.ora(state.h); }, // ORA H
+        0xb5 => { state.ora(state.l); }, // ORA L
+        0xb6 => { state.ora(state.read_memory(state.hl() as usize)); }, // ORA M
+        0xb7 => { state.ora(state.a); }, // ORA A
         0xb8 => { // CMP B
             let answer = state.a.wrapping_sub(state.b);
             state.cc.z = if answer == 0 { 1 } else { 0 };
