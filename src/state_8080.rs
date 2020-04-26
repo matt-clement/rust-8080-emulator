@@ -63,6 +63,18 @@ impl State8080 {
         self.l = (result & 0x00ff) as u8;
     }
 
+    // I'm not sure how to implement this as a method on the state object and
+    // also use it for multiple registers without resorting to something that
+    // would add a lot of complexity (interior mutability? enum of all
+    // regitsers with a match?), which is why it's a function.
+    pub fn decrement_register(register_value: &mut u8, cc: &mut ConditionCodes) {
+        let answer: u8 = register_value.wrapping_sub(1);
+        cc.z = if answer == 0 { 1 } else { 0 };
+        cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        cc.p = parity(answer);
+        *register_value = answer;
+    }
+
     pub fn interrupt_enabled(&self) -> bool {
         self.int_enable != 0
     }
@@ -138,4 +150,13 @@ impl std::fmt::Debug for State8080 {
             .field("cc", &self.cc)
             .finish()
     }
+}
+
+// Returns 1 for even parity, 0 for odd
+fn parity(x: u8) -> u8 {
+    let mut p: u8 = x ^ x.checked_shr(1).unwrap_or(0);
+    p ^= p.checked_shr(2).unwrap_or(0);
+    p ^= p.checked_shr(4).unwrap_or(0);
+    p ^= p.checked_shr(8).unwrap_or(0);
+    if (p & 0x01) == 1 { 0 } else { 1 }
 }

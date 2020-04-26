@@ -91,11 +91,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.b = masked_answer;
         },
         0x05 => { // DCR B
-            let answer: u8 = state.b.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.b = answer;
+            State8080::decrement_register(&mut state.b, &mut state.cc);
         },
         0x06 => { // MVI B, D8
             state.b = state.read_memory(program_counter + 1);
@@ -126,11 +122,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.c = masked_answer;
         },
         0x0d => { // DCR C
-            let answer: u8 = state.c.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.c = answer;
+            State8080::decrement_register(&mut state.c, &mut state.cc);
         },
         0x0e => { // MVI C, D8
             state.c = state.read_memory(program_counter + 1);
@@ -163,11 +155,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.d = masked_answer;
         },
         0x15 => { // DCR D
-            let answer: u8 = state.d.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.d = answer;
+            State8080::decrement_register(&mut state.d, &mut state.cc);
         },
         0x16 => { // MVI D, D8
             state.d = state.read_memory(program_counter + 1);
@@ -200,11 +188,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.e = masked_answer;
         },
         0x1d => { // DCR E
-            let answer: u8 = state.e.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.e = answer;
+            State8080::decrement_register(&mut state.e, &mut state.cc);
         },
         0x1e => { // MVI E, D8
             state.e = state.read_memory(program_counter + 1);
@@ -243,11 +227,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.h = masked_answer;
         },
         0x25 => { // DCR H
-            let answer: u8 = state.h.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.h = answer;
+            State8080::decrement_register(&mut state.h, &mut state.cc);
         },
         0x26 => { // MVI H, D8
             state.h = state.read_memory(program_counter + 1);
@@ -293,11 +273,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.l = masked_answer;
         },
         0x2d => { // DCR L
-            let answer: u8 = state.l.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.l = answer;
+            State8080::decrement_register(&mut state.l, &mut state.cc);
         },
         0x2e => { // MVI L, D8
             state.l = state.read_memory(program_counter + 1);
@@ -372,11 +348,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = masked_answer;
         },
         0x3d => { // DCR A
-            let answer: u8 = state.a.wrapping_sub(1);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(answer);
-            state.a = answer;
+            State8080::decrement_register(&mut state.a, &mut state.cc);
         },
         0x3e => { // MVI A, D8
             state.a = state.read_memory(program_counter + 1);
