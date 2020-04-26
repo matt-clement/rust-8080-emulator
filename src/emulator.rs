@@ -430,78 +430,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x85 => { state.add(state.l); }, // ADD L
         0x86 => { state.add(state.read_memory(state.hl() as usize)); }, // ADD M
         0x87 => { state.add(state.a); }, // ADD A
-        0x88 => { // ADC B
-            let answer: u16 = (state.a as u16) + (state.b as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x89 => { // ADC C
-            let answer: u16 = (state.a as u16) + (state.c as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x8a => { // ADC D
-            let answer: u16 = (state.a as u16) + (state.d as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x8b => { // ADC E
-            let answer: u16 = (state.a as u16) + (state.e as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x8c => { // ADC H
-            let answer: u16 = (state.a as u16) + (state.h as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x8d => { // ADC L
-            let answer: u16 = (state.a as u16) + (state.l as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x8e => { // ADC M
-            let answer: u16 = (state.a as u16) + state.read_memory(state.hl() as usize) as u16 + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x8f => { // ADC A
-            let answer: u16 = (state.a as u16) + (state.a as u16) + (state.cc.cy as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
+        0x88 => { state.addc(state.b); }, // ADC B
+        0x89 => { state.addc(state.c); }, // ADC C
+        0x8a => { state.addc(state.d); }, // ADC D
+        0x8b => { state.addc(state.e); }, // ADC E
+        0x8c => { state.addc(state.h); }, // ADC H
+        0x8d => { state.addc(state.l); }, // ADC L
+        0x8e => { state.addc(state.read_memory(state.hl() as usize)); }, // ADC M
+        0x8f => { state.addc(state.a); }, // ADC A
         0x90 => { // SUB B
             let answer: u8 = state.a.wrapping_sub(state.b);
             state.cc.z = if answer == 0 { 1 } else { 0 };
