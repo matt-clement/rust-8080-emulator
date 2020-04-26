@@ -422,98 +422,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = state.read_memory(state.hl() as usize);
         },
         0x7f => state.a = state.a, // MOV A, A
-        0x80 => { // ADD B
-            let answer: u16 = state.a as u16 + state.b as u16;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-
-            // Zero flag: if the result is zero set the flag, else clear it
-            if masked_answer == 0 {
-                state.cc.z = 1;
-            } else {
-                state.cc.z = 0;
-            }
-
-            // Sign flag: if bit 7 is 1 set the flag, else clear it
-            if (answer & 0x80) == 0x80 {
-                state.cc.s = 1;
-            } else {
-                state.cc.s = 0;
-            }
-
-            // Carry flag
-            if answer > 0xff {
-                state.cc.cy = 1;
-            } else {
-                state.cc.cy = 0;
-            }
-
-            state.cc.p = parity(masked_answer);
-
-            state.a = masked_answer;
-        },
-        0x81 => { // ADD C
-            let answer: u16 = (state.a as u16) + (state.c as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x82 => { // ADD D
-            let answer: u16 = (state.a as u16) + (state.d as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x83 => { // ADD E
-            let answer: u16 = (state.a as u16) + (state.e as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x84 => { // ADD H
-            let answer: u16 = (state.a as u16) + (state.h as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x85 => { // ADD L
-            let answer: u16 = (state.a as u16) + (state.l as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x86 => { // ADD M
-            let answer: u16 = (state.a as u16) + state.read_memory(state.hl() as usize) as u16;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
-        0x87 => { // ADD A
-            let answer: u16 = (state.a as u16) + (state.a as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
-        },
+        0x80 => { state.add(state.b); }, // ADD B
+        0x81 => { state.add(state.c); }, // ADD C
+        0x82 => { state.add(state.d); }, // ADD D
+        0x83 => { state.add(state.e); }, // ADD E
+        0x84 => { state.add(state.h); }, // ADD H
+        0x85 => { state.add(state.l); }, // ADD L
+        0x86 => { state.add(state.read_memory(state.hl() as usize)); }, // ADD M
+        0x87 => { state.add(state.a); }, // ADD A
         0x88 => { // ADC B
             let answer: u16 = (state.a as u16) + (state.b as u16) + (state.cc.cy as u16);
             let masked_answer: u8 = (answer & 0xff) as u8;

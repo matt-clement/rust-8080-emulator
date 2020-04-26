@@ -63,6 +63,16 @@ impl State8080 {
         self.l = (result & 0x00ff) as u8;
     }
 
+    pub fn add(&mut self, value: u8) {
+        let answer: u16 = (self.a as u16) + (value as u16);
+        let masked_answer: u8 = (answer & 0xff) as u8;
+        self.cc.z = if masked_answer == 0 { 1 } else { 0 };
+        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.cy = if answer > 0xff { 1 } else { 0 };
+        self.cc.p = parity(masked_answer);
+        self.a = masked_answer;
+    }
+
     // I'm not sure how to implement this as a method on the state object and
     // also use it for multiple registers without resorting to something that
     // would add a lot of complexity (interior mutability? enum of all
