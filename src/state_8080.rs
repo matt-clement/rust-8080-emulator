@@ -73,7 +73,7 @@ impl State8080 {
         self.a = masked_answer;
     }
 
-    pub fn addc(&mut self, value: u8) {
+    pub fn adc(&mut self, value: u8) {
         let answer: u16 = (self.a as u16) + (value as u16) + (self.cc.cy as u16);
         let masked_answer: u8 = (answer & 0xff) as u8;
         self.cc.z = if masked_answer == 0 { 1 } else { 0 };
@@ -92,7 +92,7 @@ impl State8080 {
         self.a = answer;
     }
 
-    pub fn subb(&mut self, value: u8) {
+    pub fn sbb(&mut self, value: u8) {
         let subtrahend: u8 = value + self.cc.cy;
         let answer: u8 = self.a.wrapping_sub(subtrahend);
         self.cc.z = if answer == 0 { 1 } else { 0 };
