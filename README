@@ -52,6 +52,7 @@ TODO
  * Research programs other than space invaders to run.
  * Think about improving the debugging experience - good logs, possible breakpoints or pause/step/continue execution. Maybe a visual represenation of the CPU state could be helpful with a log of the current and most recent ~5 instructions?
  * Assembler
+ * Parity as lookup table?
 
 
 CONTRIBUTING
