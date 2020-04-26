@@ -454,70 +454,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x9d => { state.subb(state.l); }, // SBB L
         0x9e => { state.subb(state.read_memory(state.hl() as usize)); }, // SBB M
         0x9f => { state.subb(state.a); }, // SBB A
-        0xa0 => { // ANA B
-            let answer: u8 = state.a & state.b;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa1 => { // ANA C
-            let answer: u8 = state.a & state.c;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa2 => { // ANA D
-            let answer: u8 = state.a & state.d;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa3 => { // ANA E
-            let answer: u8 = state.a & state.e;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa4 => { // ANA H
-            let answer: u8 = state.a & state.h;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa5 => { // ANA L
-            let answer: u8 = state.a & state.l;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa6 => { // ANA M
-            let answer: u8 = state.a & state.read_memory(state.hl() as usize);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
-        0xa7 => { // ANA A
-            let answer: u8 = state.a & state.a;
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = 0;
-            state.cc.p = parity(answer);
-            state.a = answer;
-        },
+        0xa0 => { state.ana(state.b); }, // ANA B
+        0xa1 => { state.ana(state.c); }, // ANA C
+        0xa2 => { state.ana(state.d); }, // ANA D
+        0xa3 => { state.ana(state.e); }, // ANA E
+        0xa4 => { state.ana(state.h); }, // ANA H
+        0xa5 => { state.ana(state.l); }, // ANA L
+        0xa6 => { state.ana(state.read_memory(state.hl() as usize)); }, // ANA M
+        0xa7 => { state.ana(state.a); }, // ANA A
         0xa8 => { // XRA B
             let answer: u8 = state.a ^ state.b;
             state.cc.z = if answer == 0 { 1 } else { 0 };
