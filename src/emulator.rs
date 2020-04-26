@@ -268,26 +268,23 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.sp += 1;
         },
         0x34 => { // INR M
-            let address: usize = state.hl() as usize;
-            let answer: u16 = state.read_memory(address) as u16 + 1;
+            let answer: u16 = state.m() as u16 + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(masked_answer);
-            state.write_memory(address, masked_answer);
+            state.set_m(masked_answer);
         },
         0x35 => { // DCR M
-            let address: u16 = state.hl();
-            let minuend: u8 = state.read_memory(address as usize);
+            let minuend: u8 = state.m();
             let answer: u8 = minuend.wrapping_sub(1);
             state.cc.z = if answer == 0 { 1 } else { 0 };
             state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
             state.cc.p = parity(answer);
-            state.write_memory(address as usize, answer);
+            state.set_m(answer);
         },
         0x36 => { // MVI M, D8
-            let address: usize = state.hl() as usize;
-            state.write_memory(address, state.read_memory(program_counter + 1));
+            state.set_m(state.read_memory(program_counter + 1));
             state.increment_program_counter(1);
         },
         0x37 => { // STC
@@ -326,9 +323,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x43 => state.b = state.e, // MOV B, E
         0x44 => state.b = state.h, // MOV B, H
         0x45 => state.b = state.l, // MOV B, L
-        0x46 => { // MOV B, M
-            state.b = state.read_memory(state.hl() as usize);
-        },
+        0x46 => { state.b = state.m(); }, // MOV B, M
         0x47 => state.b = state.a, // MOV B, A
         0x48 => state.c = state.b, // MOV C, B
         0x49 => state.c = state.c, // MOV C, C
@@ -336,9 +331,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x4b => state.c = state.e, // MOV C, E
         0x4c => state.c = state.h, // MOV C, H
         0x4d => state.c = state.l, // MOV C, L
-        0x4e => { // MOV C, M
-            state.c = state.read_memory(state.hl() as usize);
-        },
+        0x4e => { state.c = state.m(); }, // MOV C, M
         0x4f => state.c = state.a, // MOV C, A
         0x50 => state.d = state.b, // MOV D, B
         0x51 => state.d = state.c, // MOV D, C
@@ -346,9 +339,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x53 => state.d = state.e, // MOV D, E
         0x54 => state.d = state.h, // MOV D, H
         0x55 => state.d = state.l, // MOV D, L
-        0x56 => { // MOV D, M
-            state.d = state.read_memory(state.hl() as usize);
-        },
+        0x56 => { state.d = state.m(); }, // MOV D, M
         0x57 => state.d = state.a, // MOV D, A
         0x58 => state.e = state.b, // MOV E, B
         0x59 => state.e = state.c, // MOV E, C
@@ -356,9 +347,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x5b => state.e = state.e, // MOV E, E
         0x5c => state.e = state.h, // MOV E, H
         0x5d => state.e = state.l, // MOV E, L
-        0x5e => { // MOV E, M
-            state.e = state.read_memory(state.hl() as usize);
-        },
+        0x5e => { state.e = state.m(); }, // MOV E, M
         0x5f => state.e = state.a, // MOV E, A
         0x60 => state.h = state.b, // MOV H, B
         0x61 => state.h = state.c, // MOV H, C
@@ -366,9 +355,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x63 => state.h = state.e, // MOV H, E
         0x64 => state.h = state.h, // MOV H, H
         0x65 => state.h = state.l, // MOV H, L
-        0x66 => { // MOV H, M
-            state.h = state.read_memory(state.hl() as usize);
-        },
+        0x66 => { state.h = state.m(); }, // MOV H, M
         0x67 => state.h = state.a, // MOV H, A
         0x68 => state.l = state.b, // MOV L, B
         0x69 => state.l = state.c, // MOV L, C
@@ -376,51 +363,26 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x6b => state.l = state.e, // MOV L, E
         0x6c => state.l = state.h, // MOV L, H
         0x6d => state.l = state.l, // MOV L, L
-        0x6e => { // MOV L, M
-            state.l = state.read_memory(state.hl() as usize);
-        },
+        0x6e => { state.l = state.m(); }, // MOV L, M
         0x6f => state.l = state.a, // MOV L, A
-        0x70 => { // MOV M, B
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.b);
-        }
-        0x71 => { // MOV M, C
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.c);
-        },
-        0x72 => { // MOV M, D
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.d);
-        },
-        0x73 => { // MOV M, E
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.e);
-        },
-        0x74 => { // MOV M, H
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.h);
-        },
-        0x75 => { // MOV M, L
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.l);
-        },
+        0x70 => { state.set_m(state.b); } // MOV M, B
+        0x71 => { state.set_m(state.c); }, // MOV M, C
+        0x72 => { state.set_m(state.d); }, // MOV M, D
+        0x73 => { state.set_m(state.e); }, // MOV M, E
+        0x74 => { state.set_m(state.h); }, // MOV M, H
+        0x75 => { state.set_m(state.l); }, // MOV M, L
         0x76 => { // HLT
             // This is a bit aggressive
             std::process::exit(0);
         },
-        0x77 => { // MOV M, A
-            let address: u16 = state.hl();
-            state.write_memory(address as usize, state.a);
-        },
+        0x77 => { state.set_m(state.a); }, // MOV M, A
         0x78 => state.a = state.b, // MOV A, B
         0x79 => state.a = state.c, // MOV A, C
         0x7a => state.a = state.d, // MOV A, D
         0x7b => state.a = state.e, // MOV A, E
         0x7c => state.a = state.h, // MOV A, H
         0x7d => state.a = state.l, // MOV A, L
-        0x7e => { // MOV A, M
-            state.a = state.read_memory(state.hl() as usize);
-        },
+        0x7e => { state.a = state.m(); }, // MOV A, M
         0x7f => state.a = state.a, // MOV A, A
         0x80 => { state.add(state.b); }, // ADD B
         0x81 => { state.add(state.c); }, // ADD C
@@ -428,7 +390,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x83 => { state.add(state.e); }, // ADD E
         0x84 => { state.add(state.h); }, // ADD H
         0x85 => { state.add(state.l); }, // ADD L
-        0x86 => { state.add(state.read_memory(state.hl() as usize)); }, // ADD M
+        0x86 => { state.add(state.m()); }, // ADD M
         0x87 => { state.add(state.a); }, // ADD A
         0x88 => { state.adc(state.b); }, // ADC B
         0x89 => { state.adc(state.c); }, // ADC C
@@ -436,7 +398,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x8b => { state.adc(state.e); }, // ADC E
         0x8c => { state.adc(state.h); }, // ADC H
         0x8d => { state.adc(state.l); }, // ADC L
-        0x8e => { state.adc(state.read_memory(state.hl() as usize)); }, // ADC M
+        0x8e => { state.adc(state.m()); }, // ADC M
         0x8f => { state.adc(state.a); }, // ADC A
         0x90 => { state.sub(state.b); }, // SUB B
         0x91 => { state.sub(state.c); }, // SUB C
@@ -444,7 +406,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x93 => { state.sub(state.e); }, // SUB E
         0x94 => { state.sub(state.h); }, // SUB H
         0x95 => { state.sub(state.l); }, // SUB L
-        0x96 => { state.sub(state.read_memory(state.hl() as usize)); }, // SUB M
+        0x96 => { state.sub(state.m()); }, // SUB M
         0x97 => { state.sub(state.a); }, // SUB A
         0x98 => { state.sbb(state.b); }, // SBB B
         0x99 => { state.sbb(state.c); }, // SBB C
@@ -452,7 +414,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0x9b => { state.sbb(state.e); }, // SBB E
         0x9c => { state.sbb(state.h); }, // SBB H
         0x9d => { state.sbb(state.l); }, // SBB L
-        0x9e => { state.sbb(state.read_memory(state.hl() as usize)); }, // SBB M
+        0x9e => { state.sbb(state.m()); }, // SBB M
         0x9f => { state.sbb(state.a); }, // SBB A
         0xa0 => { state.ana(state.b); }, // ANA B
         0xa1 => { state.ana(state.c); }, // ANA C
@@ -460,7 +422,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xa3 => { state.ana(state.e); }, // ANA E
         0xa4 => { state.ana(state.h); }, // ANA H
         0xa5 => { state.ana(state.l); }, // ANA L
-        0xa6 => { state.ana(state.read_memory(state.hl() as usize)); }, // ANA M
+        0xa6 => { state.ana(state.m()); }, // ANA M
         0xa7 => { state.ana(state.a); }, // ANA A
         0xa8 => { state.xra(state.b); }, // XRA B
         0xa9 => { state.xra(state.c); }, // XRA C
@@ -468,7 +430,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xab => { state.xra(state.e); }, // XRA E
         0xac => { state.xra(state.h); }, // XRA H
         0xad => { state.xra(state.l); }, // XRA L
-        0xae => { state.xra(state.read_memory(state.hl() as usize)); }, // XRA M
+        0xae => { state.xra(state.m()); }, // XRA M
         0xaf => { state.xra(state.a); }, // XRA A
         0xb0 => { state.ora(state.b); }, // ORA B
         0xb1 => { state.ora(state.c); }, // ORA C
@@ -476,7 +438,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xb3 => { state.ora(state.e); }, // ORA E
         0xb4 => { state.ora(state.h); }, // ORA H
         0xb5 => { state.ora(state.l); }, // ORA L
-        0xb6 => { state.ora(state.read_memory(state.hl() as usize)); }, // ORA M
+        0xb6 => { state.ora(state.m()); }, // ORA M
         0xb7 => { state.ora(state.a); }, // ORA A
         0xb8 => { state.cmp(state.b); }, // CMP B
         0xb9 => { state.cmp(state.c); }, // CMP C
@@ -484,7 +446,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xbb => { state.cmp(state.e); }, // CMP E
         0xbc => { state.cmp(state.h); }, // CMP H
         0xbd => { state.cmp(state.l); }, // CMP L
-        0xbe => { state.cmp(state.read_memory(state.hl() as usize)); }, // CMP M
+        0xbe => { state.cmp(state.m()); }, // CMP M
         0xbf => { state.cmp(state.a); }, // CMP A
         0xc0 => { // RNZ
             if state.cc.z != 0 {

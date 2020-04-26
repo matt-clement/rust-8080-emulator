@@ -63,6 +63,14 @@ impl State8080 {
         self.l = (result & 0x00ff) as u8;
     }
 
+    pub fn m(&self) -> u8 {
+        self.read_memory(self.hl() as usize)
+    }
+
+    pub fn set_m(&mut self, value: u8) {
+        self.write_memory(self.hl() as usize, value);
+    }
+
     pub fn add(&mut self, value: u8) {
         let answer: u16 = (self.a as u16) + (value as u16);
         let masked_answer: u8 = (answer & 0xff) as u8;
