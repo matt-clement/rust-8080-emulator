@@ -478,63 +478,14 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xb5 => { state.ora(state.l); }, // ORA L
         0xb6 => { state.ora(state.read_memory(state.hl() as usize)); }, // ORA M
         0xb7 => { state.ora(state.a); }, // ORA A
-        0xb8 => { // CMP B
-            let answer = state.a.wrapping_sub(state.b);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.b > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xb9 => { // CMP C
-            let answer = state.a.wrapping_sub(state.c);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.c > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xba => { // CMP D
-            let answer = state.a.wrapping_sub(state.d);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.d > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xbb => { // CMP E
-            let answer = state.a.wrapping_sub(state.e);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.e > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xbc => { // CMP H
-            let answer = state.a.wrapping_sub(state.h);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.h > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xbd => { // CMP L
-            let answer = state.a.wrapping_sub(state.l);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.l > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xbe => { // CMP M
-            let value = state.read_memory(state.hl() as usize);
-            let answer = state.a.wrapping_sub(value);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if value > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
-        0xbf => { // CMP A
-            let answer = state.a.wrapping_sub(state.a);
-            state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if state.a > state.a { 1 } else { 0 };
-            state.cc.p = parity(answer);
-        },
+        0xb8 => { state.cmp(state.b); }, // CMP B
+        0xb9 => { state.cmp(state.c); }, // CMP C
+        0xba => { state.cmp(state.d); }, // CMP D
+        0xbb => { state.cmp(state.e); }, // CMP E
+        0xbc => { state.cmp(state.h); }, // CMP H
+        0xbd => { state.cmp(state.l); }, // CMP L
+        0xbe => { state.cmp(state.read_memory(state.hl() as usize)); }, // CMP M
+        0xbf => { state.cmp(state.a); }, // CMP A
         0xc0 => { // RNZ
             if state.cc.z != 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;

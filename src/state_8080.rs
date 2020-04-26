@@ -129,6 +129,14 @@ impl State8080 {
         self.a = answer;
     }
 
+    pub fn cmp(&mut self, value: u8) {
+        let answer = self.a.wrapping_sub(value);
+        self.cc.z = if answer == 0 { 1 } else { 0 };
+        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.cy = if value > self.a { 1 } else { 0 };
+        self.cc.p = parity(answer);
+    }
+
     // I'm not sure how to implement this as a method on the state object and
     // also use it for multiple registers without resorting to something that
     // would add a lot of complexity (interior mutability? enum of all
