@@ -83,12 +83,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_bc(state.bc().wrapping_add(1));
         },
         0x04 => { // INR B
-            let answer: u16 = (state.b as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.b = masked_answer;
+            State8080::increment_register(&mut state.b, &mut state.cc);
         },
         0x05 => { // DCR B
             State8080::decrement_register(&mut state.b, &mut state.cc);
@@ -114,12 +109,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_bc(state.bc().wrapping_sub(1));
         },
         0x0c => { // INR C
-            let answer: u16 = (state.c as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.c = masked_answer;
+            State8080::increment_register(&mut state.c, &mut state.cc);
         },
         0x0d => { // DCR C
             State8080::decrement_register(&mut state.c, &mut state.cc);
@@ -147,12 +137,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_de(state.de().wrapping_add(1));
         }
         0x14 => { // INR D
-            let answer: u16 = (state.d as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.d = masked_answer;
+            State8080::increment_register(&mut state.d, &mut state.cc);
         },
         0x15 => { // DCR D
             State8080::decrement_register(&mut state.d, &mut state.cc);
@@ -180,12 +165,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_de(state.de().wrapping_sub(1));
         },
         0x1c => { // INR E
-            let answer: u16 = (state.e as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.e = masked_answer;
+            State8080::increment_register(&mut state.e, &mut state.cc);
         },
         0x1d => { // DCR E
             State8080::decrement_register(&mut state.e, &mut state.cc);
@@ -219,12 +199,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_hl(state.hl().wrapping_add(1));
         },
         0x24 => { // INR H
-            let answer: u16 = (state.h as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.h = masked_answer;
+            State8080::increment_register(&mut state.h, &mut state.cc);
         },
         0x25 => { // DCR H
             State8080::decrement_register(&mut state.h, &mut state.cc);
@@ -265,12 +240,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_hl(state.hl().wrapping_sub(1));
         },
         0x2c => { // INR L
-            let answer: u16 = (state.l as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.l = masked_answer;
+            State8080::increment_register(&mut state.l, &mut state.cc);
         },
         0x2d => { // DCR L
             State8080::decrement_register(&mut state.l, &mut state.cc);
@@ -340,12 +310,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.sp = state.sp.wrapping_sub(1);
         },
         0x3c => { // INR A
-            let answer: u16 = (state.a as u16) + 1;
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.p = parity(masked_answer);
-            state.a = masked_answer;
+            State8080::increment_register(&mut state.a, &mut state.cc);
         },
         0x3d => { // DCR A
             State8080::decrement_register(&mut state.a, &mut state.cc);

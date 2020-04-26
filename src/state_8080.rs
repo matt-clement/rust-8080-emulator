@@ -75,6 +75,15 @@ impl State8080 {
         *register_value = answer;
     }
 
+    pub fn increment_register(register_value: &mut u8, cc: &mut ConditionCodes) {
+        let answer: u16 = (register_value.clone() as u16) + 1;
+        let masked_answer: u8 = (answer & 0xff) as u8;
+        cc.z = if masked_answer == 0 { 1 } else { 0 };
+        cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        cc.p = parity(masked_answer);
+        *register_value = masked_answer;
+    }
+
     pub fn interrupt_enabled(&self) -> bool {
         self.int_enable != 0
     }
