@@ -62,9 +62,7 @@ pub fn start(state: State8080) {
     canvas.present();
     let mut color_scheme = ColorScheme::CLASSIC;
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
     'running: loop {
-        i = (i + 1) % 255;
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} |
@@ -119,7 +117,6 @@ pub fn start(state: State8080) {
                     }
                 }
             }
-
         }
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
@@ -199,7 +196,6 @@ fn draw(state: &State8080, canvas: &mut Canvas<sdl2::video::Window>, color_schem
         (0..0x8).into_iter().for_each(|shift| {
             let screen_y = screen_y_base - shift;
             let bit = (current_byte & (1 << shift)) >> shift;
-            // TODO: Different screen regions have different colors
             let expanded_pixel_data = color_scheme.get_pixel_color(screen_x as u8, screen_y as u8, bit);
             let pixel_index = (screen_x + screen_y * 224) as usize;
             pixels[pixel_index] = expanded_pixel_data as u8;
