@@ -50,7 +50,7 @@ pub fn start(state: State8080) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let window = video_subsystem.window("space-invaders", 224, 256)
+    let window = video_subsystem.window("space-invaders", 224 * 2, 256 * 2)
       .position_centered()
       .build()
       .unwrap();
