@@ -63,8 +63,8 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
     match opcode {
         0x00 => {}, // NOP
         0x01 => { // LXI B, D16
-            state.c = state.read_memory(program_counter + 1);
             state.b = state.read_memory(program_counter + 2);
+            state.c = state.read_memory(program_counter + 1);
             state.increment_program_counter(2);
         },
         0x02 => { // STAX B
@@ -900,22 +900,6 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         },
         0xfd => unimplemented_instruction(state), // -
         0xfe => { // CPI D8
-            /*
-            let acc = state.a;
-            let immediate_data = state.read_memory(program_counter + 1);
-            let answer: u16 = (acc as u16).wrapping_sub(immediate_data as u16);
-            let masked_answer: u8 = answer as u8 & 0xff;
-            let same_sign = acc & 0x80 == immediate_data & 0x80;
-            let (carry_positive, carry_negative) = if same_sign { (1, 0) } else { (1, 0) };
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
-            state.cc.cy = if answer > 0xff { carry_positive } else { carry_negative };
-            state.cc.p = Parity::from(masked_answer);
-            state.increment_program_counter(1);
-            */
-
-            // The following aligns with implementations I've seen
-            // I still have to convince myself that it's right.
             let immediate_data = state.read_memory(program_counter + 1);
             let answer: u8 = state.a.wrapping_sub(immediate_data);
             state.cc.z = if answer == 0 { 1 } else { 0 };
@@ -1402,10 +1386,34 @@ mod test {
     #[test]
     fn test_cpi() {
         let mut state = State8080::empty_state();
-        state.memory = vec![0xfe, 0xc0];
+        state.memory = vec![0xfe, 0x40];
+        state.a = 0x4a;
+        state.cc.cy = 1;
+        state.cc.z = 1;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.cc.cy, 0);
+        assert_eq!(state.cc.z, 0);
+        assert_eq!(state.program_counter(), 2);
+    }
+
+    #[test]
+    fn test_cpi_equal() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xfe, 0x4a];
         state.a = 0x4a;
         emulate_8080_op(&mut state);
-        // TODO: assert_eq!(state.cc.cy, 0);
+        assert_eq!(state.cc.cy, 0);
+        assert_eq!(state.cc.z, 1);
+        assert_eq!(state.program_counter(), 2);
+    }
+
+    #[test]
+    fn test_cpi_greater() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0xfe, 0x4b];
+        state.a = 0x4a;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.cc.cy, 1);
         assert_eq!(state.cc.z, 0);
         assert_eq!(state.program_counter(), 2);
     }
