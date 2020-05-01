@@ -25,6 +25,9 @@ struct SpaceInvadersMachine {
     shift_offset: u8,
 
     in_port1: u8,
+    in_port2: u8,
+    out_port3: u8,
+    out_port5: u8,
     paused: bool,
 }
 
@@ -40,6 +43,9 @@ impl SpaceInvadersMachine {
             shift_high: 0,
             shift_offset: 0,
             in_port1: 0,
+            in_port2: 0,
+            out_port3: 0,
+            out_port5: 0,
             paused: false,
         }
     }
@@ -95,8 +101,9 @@ pub fn start(state: State8080) {
                 // Special handling for IN
                 0xdb => {
                     let port_number = machine.state.memory[program_counter + 1];
-                    handle_in(&mut machine, port_number);
+                    machine.state.a = handle_in(&mut machine, port_number);
                     machine.state.increment_program_counter(2);
+                    cycle_count += 3;
                 },
                 // Special handling for OUT
                 0xd3 => {
@@ -104,17 +111,18 @@ pub fn start(state: State8080) {
                     let value = machine.state.a;
                     handle_out(&mut machine, port_number, value);
                     machine.state.increment_program_counter(2);
+                    cycle_count += 3;
                 },
                 _ => {
                     cycle_count += emulator::emulate_8080_op(&mut machine.state);
-                    let current_time = Instant::now();
-                    let time_since_last_interrupt = current_time.saturating_duration_since(machine.last_timer);
-                    if time_since_last_interrupt.as_secs_f64() > 1.0/60.0 {
-                        if machine.state.interrupt_enabled() {
-                            machine.state.generate_interrupt(2);
-                            machine.last_timer = current_time;
-                        }
-                    }
+                }
+            }
+            let current_time = Instant::now();
+            let time_since_last_interrupt = current_time.saturating_duration_since(machine.last_timer);
+            if time_since_last_interrupt.as_secs_f64() > 1.0/60.0 {
+                if machine.state.interrupt_enabled() {
+                    machine.state.generate_interrupt(2);
+                    machine.last_timer = current_time;
                 }
             }
         }
@@ -122,15 +130,17 @@ pub fn start(state: State8080) {
     }
 }
 
-fn handle_in(machine: &mut SpaceInvadersMachine, port: u8) {
+fn handle_in(machine: &mut SpaceInvadersMachine, port: u8) -> u8 {
     match port {
-        1 => machine.state.a = machine.in_port1,
+        0 => { 0xf },
+        1 => machine.in_port1,
+        2 => { 0 }, // Player 2 controls and some other random stuff
         3 => {
             let value: u16 = ((machine.shift_high as u16) << 8) | machine.shift_low as u16;
             let masked_value: u8 = ((value >> (8 - machine.shift_offset)) & 0xff) as u8;
-            machine.state.a = masked_value;
+            masked_value
         },
-        _ => {},
+        _ => { unreachable!() },
     }
 }
 
@@ -139,9 +149,15 @@ fn handle_out(machine: &mut SpaceInvadersMachine, port: u8, value: u8) {
         2 => {
             machine.shift_offset = value & 0x7;
         },
+        3 => {
+            machine.out_port3 = value;
+        }
         4 => {
             machine.shift_low = machine.shift_high;
             machine.shift_high = value;
+        }
+        5 => {
+            machine.out_port5 = value;
         }
         _ => {},
     }
