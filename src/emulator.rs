@@ -112,9 +112,8 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.increment_program_counter(1);
         },
         0x0f => { // RRC
-            let low_bit = state.a & 0x01;
-            state.a = (state.a >> 1) | (low_bit << 7);
-            state.cc.cy = low_bit;
+            state.cc.cy = state.a & 0x01;
+            state.a = state.a.rotate_right(1);
         },
         0x10 => unimplemented_instruction(state), // -
         0x11 => { // LXI D, D16
