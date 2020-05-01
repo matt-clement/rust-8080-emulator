@@ -4,6 +4,7 @@ use std::fs::File;
 mod disassembler;
 mod emulator;
 mod parity;
+mod sign;
 mod space_invaders;
 mod state_8080;
 

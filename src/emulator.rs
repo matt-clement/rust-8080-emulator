@@ -1,6 +1,7 @@
 use crate::state_8080::State8080;
 use crate::disassembler;
 use crate::parity::Parity;
+use crate::sign::Sign;
 
 fn unimplemented_instruction(state: &State8080) -> ! {
     // Subtracting one from the program counter is a workaround because we
@@ -263,7 +264,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let answer: u16 = state.m() as u16 + 1;
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(masked_answer);
             state.cc.p = Parity::from(masked_answer);
             state.set_m(masked_answer);
         },
@@ -271,7 +272,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let minuend: u8 = state.m();
             let answer: u8 = minuend.wrapping_sub(1);
             state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.p = Parity::from(answer);
             state.set_m(answer);
         },
@@ -488,7 +489,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let answer: u16 = (state.a as u16) + (state.read_memory(program_counter + 1) as u16);
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(masked_answer);
             state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = Parity::from(masked_answer);
             state.a = masked_answer;
@@ -551,7 +552,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let answer: u16 = (state.a as u16) + (state.read_memory(program_counter + 1) as u16) + state.cc.cy as u16;
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(masked_answer);
             state.cc.cy = if answer > 0xff { 1 } else { 0 };
             state.cc.p = Parity::from(masked_answer);
             state.a = masked_answer;
@@ -611,7 +612,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let subtrahend: u8 = state.read_memory(program_counter + 1);
             let answer: u8 = state.a.wrapping_sub(subtrahend);
             state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
             state.cc.p = Parity::from(answer);
             state.a = answer;
@@ -665,7 +666,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let subtrahend: u8 = state.read_memory(program_counter + 1).wrapping_add(state.cc.cy);
             let answer: u8 = state.a.wrapping_sub(subtrahend);
             state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.cy = if state.a < subtrahend { 1 } else { 0 };
             state.cc.p = Parity::from(answer);
             state.a = answer;
@@ -727,7 +728,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xe6 => { // ANI D8
             let answer: u8 = state.a & state.read_memory(program_counter + 1);
             state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.cy = 0;
             state.cc.p = Parity::from(answer);
             state.a = answer;
@@ -786,7 +787,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let answer: u16 = (state.a as u16) ^ (state.read_memory(program_counter + 1) as u16);
             let masked_answer: u8 = (answer & 0xff) as u8;
             state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(masked_answer);
             state.cc.cy = 0;
             state.cc.p = Parity::from(masked_answer);
             state.a = masked_answer;
@@ -800,7 +801,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_program_counter(0x28);
         }
         0xf0 => { // RP
-            if state.cc.s == 0 {
+            if state.cc.s == Sign::Positive {
                 let high_address = state.read_memory(state.sp as usize) as u16;
                 let low_address = (state.read_memory(state.sp as usize + 1) as u16) << 8;
                 state.set_program_counter(high_address | low_address);
@@ -814,10 +815,10 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.cc.p = if 0x04 == (psw & 0x04) { Parity::Even } else { Parity::Odd };
             state.cc.ac = if 0x10 == (psw & 0x10) { 1 } else { 0 };
             state.cc.z = if 0x40 == (psw & 0x40) { 1 } else { 0 };
-            state.cc.s = if 0x80 == (psw & 0x80) { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(psw);
         },
         0xf2 => { // JP adr
-            if state.cc.s == 0 {
+            if state.cc.s == Sign::Positive {
                 let high_address = (state.read_memory(program_counter + 2) as u16) << 8;
                 let low_address = state.read_memory(program_counter + 1) as u16;
                 state.set_program_counter(high_address | low_address);
@@ -829,7 +830,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.disable_interrupt();
         },
         0xf4 => { // CP adr
-            if state.cc.s == 0 {
+            if state.cc.s == Sign::Positive {
                 let ret: u16 = program_counter as u16 + 2;
                 state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
                 state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
@@ -843,13 +844,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         },
         0xf5 => { // PUSH PSW
             let cc = &state.cc;
-            let psw: u8 = cc.cy | Into::<u8>::into(cc.p) << 2 | cc.ac << 4 | cc.z << 6 | cc.s << 7;
+            let psw: u8 = cc.cy | Into::<u8>::into(cc.p) << 2 | cc.ac << 4 | cc.z << 6 | Into::<u8>::into(cc.s) << 7;
             state.push(state.a, psw);
         },
         0xf6 => { // ORI D8
             let answer: u8 = state.a | state.read_memory(program_counter + 1);
             state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.cy = 0;
             state.cc.p = Parity::from(answer);
             state.a = answer;
@@ -863,7 +864,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_program_counter(0x30);
         },
         0xf8 => { // RM
-            if state.cc.s != 0 {
+            if state.cc.s == Sign::Negative {
                 let high_address = state.read_memory(state.sp as usize) as u16;
                 let low_address = (state.read_memory(state.sp as usize + 1) as u16) << 8;
                 state.set_program_counter(high_address | low_address);
@@ -874,7 +875,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.sp = state.hl();
         },
         0xfa => { // JM adr
-            if state.cc.s != 0 {
+            if state.cc.s == Sign::Negative {
                 let high_address = (state.read_memory(program_counter + 2) as u16) << 8;
                 let low_address = state.read_memory(program_counter + 1) as u16;
                 state.set_program_counter(high_address | low_address);
@@ -886,7 +887,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.enable_interrupt();
         },
         0xfc => { // CM adr
-            if state.cc.s != 0 {
+            if state.cc.s == Sign::Negative {
                 let ret: u16 = program_counter as u16 + 2;
                 state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
                 state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
@@ -903,7 +904,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             let immediate_data = state.read_memory(program_counter + 1);
             let answer: u8 = state.a.wrapping_sub(immediate_data);
             state.cc.z = if answer == 0 { 1 } else { 0 };
-            state.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.p = Parity::from(answer);
             state.cc.cy = if state.a < immediate_data { 1 } else { 0 };
             state.increment_program_counter(1);
@@ -1232,14 +1233,14 @@ mod test {
         state.cc.p = Parity::Odd;
         state.cc.ac = 0x00;
         state.cc.z = 0x00;
-        state.cc.s = 0x00;
+        state.cc.s = Sign::Positive;
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xff);
         assert_eq!(state.cc.cy, 0x01);
         assert_eq!(state.cc.p, Parity::Odd);
         assert_eq!(state.cc.ac, 0x00);
         assert_eq!(state.cc.z, 0x01);
-        assert_eq!(state.cc.s, 0x01);
+        assert_eq!(state.cc.s, Sign::Negative);
         assert_eq!(state.sp, 0x03);
     }
 
@@ -1253,7 +1254,7 @@ mod test {
         state.cc.p = Parity::Even;
         state.cc.ac = 0x00;
         state.cc.z = 0x01;
-        state.cc.s = 0x00;
+        state.cc.s = Sign::Positive;
         emulate_8080_op(&mut state);
         assert_eq!(state.read_memory(0x01), 0x45);
         assert_eq!(state.read_memory(0x02), 0x47);
@@ -1270,7 +1271,7 @@ mod test {
         state.cc.p = Parity::Even;
         state.cc.ac = 0x00;
         state.cc.z = 0x01;
-        state.cc.s = 0x00;
+        state.cc.s = Sign::Positive;
 
         emulate_8080_op(&mut state);
         assert_eq!(state.read_memory(0x02), 0x45);
@@ -1283,7 +1284,7 @@ mod test {
         assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.ac, 0x00);
         assert_eq!(state.cc.z, 0x01);
-        assert_eq!(state.cc.s, 0x00);
+        assert_eq!(state.cc.s, Sign::Positive);
         assert_eq!(state.sp, 0x04);
     }
 
@@ -1337,7 +1338,7 @@ mod test {
         assert_eq!(state.cc.z, 0);
         assert_eq!(state.cc.cy, 0);
         assert_eq!(state.cc.p, Parity::Even);
-        assert_eq!(state.cc.s, 1);
+        assert_eq!(state.cc.s, Sign::Negative);
         // TODO: assert_eq!(state.cc.ac, 1);
     }
 
@@ -1439,7 +1440,7 @@ mod test {
         assert_eq!(state.cc.cy, 0);
         // TODO: assert_eq!(state.cc.ac, 0);
         assert_eq!(state.cc.z, 0);
-        assert_eq!(state.cc.s, 0);
+        assert_eq!(state.cc.s, Sign::Positive);
 
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0x14);
@@ -1447,7 +1448,7 @@ mod test {
         assert_eq!(state.cc.cy, 1);
         // TODO: assert_eq!(state.cc.ac, 1);
         assert_eq!(state.cc.z, 0);
-        assert_eq!(state.cc.s, 0);
+        assert_eq!(state.cc.s, Sign::Positive);
     }
 
     #[test]
@@ -1488,7 +1489,7 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xff);
         assert_eq!(state.cc.cy, 1);
-        assert_eq!(state.cc.s, 1);
+        assert_eq!(state.cc.s, Sign::Negative);
         assert_eq!(state.cc.p, Parity::Even);
         assert_eq!(state.cc.z, 0);
         // TODO: assert_eq!(state.cc.ac, 0);
@@ -1504,7 +1505,7 @@ mod test {
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xfe);
         assert_eq!(state.cc.cy, 1);
-        assert_eq!(state.cc.s, 1);
+        assert_eq!(state.cc.s, Sign::Negative);
         assert_eq!(state.cc.p, Parity::Odd);
         assert_eq!(state.cc.z, 0);
         // TODO: assert_eq!(state.cc.ac, 0);

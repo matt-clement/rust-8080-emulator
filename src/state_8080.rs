@@ -1,9 +1,10 @@
 use crate::parity::Parity;
+use crate::sign::Sign;
 
 #[derive(Debug)]
 pub struct ConditionCodes {
     pub z: u8,
-    pub s: u8,
+    pub s: Sign,
     pub p: Parity,
     pub cy: u8,
     pub ac: u8,
@@ -77,7 +78,7 @@ impl State8080 {
         let answer: u16 = (self.a as u16) + (value as u16);
         let masked_answer: u8 = (answer & 0xff) as u8;
         self.cc.z = if masked_answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(masked_answer);
         self.cc.cy = if answer > 0xff { 1 } else { 0 };
         self.cc.p = Parity::from(masked_answer);
         self.a = masked_answer;
@@ -87,7 +88,7 @@ impl State8080 {
         let answer: u16 = (self.a as u16) + (value as u16) + (self.cc.cy as u16);
         let masked_answer: u8 = (answer & 0xff) as u8;
         self.cc.z = if masked_answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(masked_answer);
         self.cc.cy = if answer > 0xff { 1 } else { 0 };
         self.cc.p = Parity::from(masked_answer);
         self.a = masked_answer;
@@ -96,7 +97,7 @@ impl State8080 {
     pub fn sub(&mut self, value: u8) {
         let answer: u8 = self.a.wrapping_sub(value);
         self.cc.z = if answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(answer);
         self.cc.cy = if self.a < value { 1 } else { 0 };
         self.cc.p = Parity::from(answer);
         self.a = answer;
@@ -106,7 +107,7 @@ impl State8080 {
         let subtrahend: u8 = value + self.cc.cy;
         let answer: u8 = self.a.wrapping_sub(subtrahend);
         self.cc.z = if answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(answer);
         self.cc.cy = if self.a < subtrahend { 1 } else { 0 };
         self.cc.p = Parity::from(answer);
         self.a = answer;
@@ -115,7 +116,7 @@ impl State8080 {
     pub fn ana(&mut self, value: u8) {
         let answer: u8 = self.a & value;
         self.cc.z = if answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(answer);
         self.cc.cy = 0;
         self.cc.p = Parity::from(answer);
         self.a = answer;
@@ -124,7 +125,7 @@ impl State8080 {
     pub fn xra(&mut self, value: u8) {
         let answer: u8 = self.a ^ value;
         self.cc.z = if answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(answer);
         self.cc.cy = 0;
         self.cc.p = Parity::from(answer);
         self.a = answer;
@@ -133,7 +134,7 @@ impl State8080 {
     pub fn ora(&mut self, value: u8) {
         let answer: u8 = self.a | value;
         self.cc.z = if answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(answer);
         self.cc.cy = 0;
         self.cc.p = Parity::from(answer);
         self.a = answer;
@@ -142,7 +143,7 @@ impl State8080 {
     pub fn cmp(&mut self, value: u8) {
         let answer = self.a.wrapping_sub(value);
         self.cc.z = if answer == 0 { 1 } else { 0 };
-        self.cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        self.cc.s = Sign::get_sign(answer);
         self.cc.cy = if value > self.a { 1 } else { 0 };
         self.cc.p = Parity::from(answer);
     }
@@ -154,7 +155,7 @@ impl State8080 {
     pub fn decrement_register(register_value: &mut u8, cc: &mut ConditionCodes) {
         let answer: u8 = register_value.wrapping_sub(1);
         cc.z = if answer == 0 { 1 } else { 0 };
-        cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        cc.s = Sign::get_sign(answer);
         cc.p = Parity::from(answer);
         *register_value = answer;
     }
@@ -163,7 +164,7 @@ impl State8080 {
         let answer: u16 = (register_value.clone() as u16) + 1;
         let masked_answer: u8 = (answer & 0xff) as u8;
         cc.z = if masked_answer == 0 { 1 } else { 0 };
-        cc.s = if (answer & 0x80) == 0x80 { 1 } else { 0 };
+        cc.s = Sign::get_sign(masked_answer);
         cc.p = Parity::from(masked_answer);
         *register_value = masked_answer;
     }
@@ -219,7 +220,7 @@ impl State8080 {
             e: 0,
             h: 0,
             l: 0,
-            cc: ConditionCodes { ac: 0, cy: 0, p: Parity::Odd, pad: 0, s: 0, z: 0 },
+            cc: ConditionCodes { ac: 0, cy: 0, p: Parity::Odd, pad: 0, s: Sign::Positive, z: 0 },
             int_enable: 0,
             memory: Vec::new(),
             sp: 0,
