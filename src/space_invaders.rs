@@ -82,6 +82,9 @@ pub fn start(state: State8080) {
                         ColorScheme::CLASSIC => ColorScheme::MONOCHROME,
                     };
                 },
+                Event::KeyDown { keycode: Some(Keycode::P), .. } => {
+                    machine.paused = !machine.paused;
+                },
                 Event::KeyDown { keycode: Some(key), .. } => machine_key_down(&mut machine, &key),
                 Event::KeyUp { keycode: Some(key), .. } => machine_key_up(&mut machine, &key),
                 _ => {}
@@ -91,7 +94,7 @@ pub fn start(state: State8080) {
         canvas.present();
         // Display is 60Hz, clock is 2MHz, this is close enough for now I guess
         let mut cycle_count = 0;
-        while cycle_count < CYCLES_PER_FRAME {
+        while !machine.paused && (cycle_count < CYCLES_PER_FRAME) {
             let program_counter = machine.state.program_counter() as usize;
             let current_opcode = machine.state.memory[program_counter];
             // Special handling for interrupts. Eventually it would be nice to
