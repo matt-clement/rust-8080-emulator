@@ -37,7 +37,7 @@ impl SpaceInvadersMachine {
             state: state,
             last_timer: Instant::now(), // Should this be an Option<Instant>?
             next_interrupt: 0.0,
-            which_interrupt: 0,
+            which_interrupt: 1,
             // timer?
             shift_low: 0,
             shift_high: 0,
@@ -124,8 +124,18 @@ pub fn start(state: State8080) {
             let time_since_last_interrupt = current_time.saturating_duration_since(machine.last_timer);
             if time_since_last_interrupt.as_secs_f64() > 1.0/60.0 {
                 if machine.state.interrupt_enabled() {
-                    machine.state.generate_interrupt(2);
-                    machine.last_timer = current_time;
+                    match machine.which_interrupt {
+                        1 => {
+                            machine.state.generate_interrupt(1);
+                            machine.last_timer = current_time;
+                            machine.which_interrupt = 2;
+                        }
+                        _ => {
+                            machine.state.generate_interrupt(2);
+                            machine.last_timer = current_time;
+                            machine.which_interrupt = 1;
+                        }
+                    }
                 }
             }
         }
