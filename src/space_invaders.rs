@@ -105,20 +105,18 @@ pub fn start(state: State8080) {
                 0xdb => {
                     let port_number = machine.state.memory[program_counter + 1];
                     machine.state.a = handle_in(&mut machine, port_number);
-                    machine.state.increment_program_counter(2);
-                    cycle_count += 3;
+                    cycle_count += emulator::emulate_8080_op(&mut machine.state);
                 },
                 // Special handling for OUT
                 0xd3 => {
                     let port_number = machine.state.memory[program_counter + 1];
                     let value = machine.state.a;
                     handle_out(&mut machine, port_number, value);
-                    machine.state.increment_program_counter(2);
-                    cycle_count += 3;
+                    cycle_count += emulator::emulate_8080_op(&mut machine.state);
                 },
                 _ => {
                     cycle_count += emulator::emulate_8080_op(&mut machine.state);
-                }
+                },
             }
             let current_time = Instant::now();
             let time_since_last_interrupt = current_time.saturating_duration_since(machine.last_timer);
