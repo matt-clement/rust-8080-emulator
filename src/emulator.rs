@@ -783,13 +783,12 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         },
         0xed => unimplemented_instruction(state), // -
         0xee => { // XRI D8
-            let answer: u16 = (state.a as u16) ^ (state.read_memory(program_counter + 1) as u16);
-            let masked_answer: u8 = (answer & 0xff) as u8;
-            state.cc.z = if masked_answer == 0 { 1 } else { 0 };
-            state.cc.s = Sign::get_sign(masked_answer);
+            let answer: u8 = state.a ^ state.read_memory(program_counter + 1);
+            state.cc.z = if answer == 0 { 1 } else { 0 };
+            state.cc.s = Sign::get_sign(answer);
             state.cc.cy = 0;
-            state.cc.p = Parity::from(masked_answer);
-            state.a = masked_answer;
+            state.cc.p = Parity::from(answer);
+            state.a = answer;
             state.increment_program_counter(1);
         },
         0xef => { // RST 5
@@ -1229,7 +1228,7 @@ mod test {
         state.sp = 0x01;
         state.a = 0x00;
         state.cc.cy = 0x00;
-        state.cc.p = Parity::Odd;
+        state.cc.p = Parity::Even;
         state.cc.ac = 0x00;
         state.cc.z = 0x00;
         state.cc.s = Sign::Positive;
