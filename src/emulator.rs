@@ -441,7 +441,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         0xbe => { state.cmp(state.m()); }, // CMP M
         0xbf => { state.cmp(state.a); }, // CMP A
         0xc0 => { // RNZ
-            if state.cc.z != 0 {
+            if state.cc.z == 0 {
                 let high_address = state.read_memory(state.sp as usize) as u16;
                 let low_address = (state.read_memory(state.sp as usize + 1) as u16) << 8;
                 state.set_program_counter(high_address | low_address);
@@ -469,7 +469,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.set_program_counter(high_address | low_address);
         },
         0xc4 => { // CNZ adr
-            if state.cc.z != 0 {
+            if state.cc.z == 0 {
                 let ret: u16 = program_counter as u16 + 2;
                 state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
                 state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
@@ -526,7 +526,7 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
         },
         0xcb => unimplemented_instruction(state), // -
         0xcc => { // CZ adr
-            if state.cc.z == 0 {
+            if state.cc.z != 0 {
                 let ret: u16 = program_counter as u16 + 2;
                 state.write_memory(state.sp as usize - 1, ((ret >> 8) & 0xff) as u8);
                 state.write_memory(state.sp as usize - 2, (ret & 0xff) as u8);
