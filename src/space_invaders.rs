@@ -42,7 +42,7 @@ impl SpaceInvadersMachine {
             shift_low: 0,
             shift_high: 0,
             shift_offset: 0,
-            in_port1: 0,
+            in_port1: 0x8,
             in_port2: 0,
             out_port3: 0,
             out_port5: 0,
