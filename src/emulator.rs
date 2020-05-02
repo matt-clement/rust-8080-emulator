@@ -308,7 +308,13 @@ pub fn emulate_8080_op(state: &mut State8080) -> u32 {
             state.a = state.read_memory(program_counter + 1);
             state.increment_program_counter(1);
         },
-        0x3f => unimplemented_instruction(state), // CMC
+        0x3f => { // CMC
+            if state.cc.cy == 0 {
+                state.cc.cy = 1;
+            } else {
+                state.cc.cy = 0;
+            }
+        },
         0x40 => state.b = state.b, // MOV B, B
         0x41 => state.b = state.c, // MOV B, C
         0x42 => state.b = state.d, // MOV B, D
@@ -1743,5 +1749,16 @@ mod test {
         state.a = 0x51;
         emulate_8080_op(&mut state);
         assert_eq!(state.a, 0xae);
+    }
+
+    #[test]
+    fn test_cmc() {
+        let mut state = State8080::empty_state();
+        state.memory = vec![0x3f, 0x3f];
+        state.cc.cy = 0x00;
+        emulate_8080_op(&mut state);
+        assert_eq!(state.cc.cy, 0x01);
+        emulate_8080_op(&mut state);
+        assert_eq!(state.cc.cy, 0x00);
     }
 }
