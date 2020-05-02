@@ -151,7 +151,7 @@ fn handle_in(machine: &mut SpaceInvadersMachine, port: u8) -> u8 {
             let masked_value: u8 = ((value >> (8 - machine.shift_offset)) & 0xff) as u8;
             masked_value
         },
-        _ => { unreachable!() },
+        _ => { 0 },
     }
 }
 
